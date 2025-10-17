@@ -1,0 +1,14 @@
+Pyrofork
+TgCrypto
+Pyleaves
+python-dotenv
+psutil
+pillow
+pyrogram
+uvloop
+flask
+flask-compress
+pymongo
+dnspython
+gunicorn
+requests

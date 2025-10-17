@@ -1,0 +1,14 @@
+[17-Oct-25 10:09:14 AM - INFO] - __init__() - Line 22: database - Successfully connected to MongoDB!
+[17-Oct-25 10:09:15 AM - INFO] - init_database() - Line 53: database - Database indexes created successfully
+[17-Oct-25 10:09:15 AM - INFO] - __init__() - Line 27: ad_monetization - Monetag ad network configured with 0 ad slot(s)
+[17-Oct-25 10:09:15 AM - INFO] - _log() - Line 97: werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.31.123.98:5000
+[17-Oct-25 10:09:15 AM - INFO] - _log() - Line 97: werkzeug - [33mPress CTRL+C to quit[0m
+[17-Oct-25 10:09:16 AM - INFO] - __init__() - Line 36: queue_manager - Queue Manager initialized: 20 concurrent, 100 max queue
+[17-Oct-25 10:09:16 AM - INFO] - start_processor() - Line 42: queue_manager - Queue processor started
+[17-Oct-25 10:09:16 AM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
+[17-Oct-25 10:09:16 AM - INFO] - _init_queue() - Line 1199: main - Download queue processor initialized
+[17-Oct-25 10:09:16 AM - INFO] - start_bot() - Line 108: __main__ - Starting Telegram bot from server.py (long polling)
+[17-Oct-25 10:09:18 AM - INFO] - start_bot() - Line 110: __main__ - Bot started successfully, waiting for updates...
