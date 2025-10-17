@@ -231,8 +231,6 @@ async def admin_stats_command(client: Client, message: Message, queue_manager=No
         stats_text = (
             "**📊 Admin Statistics**\n\n"
             f"**👥 Users:**\n"
-            f"• Total Users: `{stats.get('total_users', 0)}`\n"
-            f"• Premium Users: `{stats.get('paid_users', 0)}`\n"
             f"• Active Users (7 days): `{stats.get('active_users', 0)}`\n"
             f"• New Users Today: `{stats.get('today_new_users', 0)}`\n"
             f"• Administrators: `{stats.get('admin_count', 0)}`\n\n"

@@ -758,12 +758,18 @@ async def stats(_, message: Message):
     
     bot_memory_mb = round(process.memory_info()[0] / 1024**2)
     cpu_percent = process.cpu_percent(interval=0.1)
+    
+    bot_stats = db.get_stats()
+    total_users = bot_stats.get('total_users', 0)
+    paid_users = bot_stats.get('paid_users', 0)
 
     stats_text = (
         "**≧◉◡◉≦ Bot is Up and Running successfully.**\n\n"
         f"**➜ Bot Uptime:** `{currentTime}`\n"
         f"**➜ Bot Memory:** `{bot_memory_mb} MiB`\n"
         f"**➜ Bot CPU:** `{cpu_percent}%`\n\n"
+        f"**➜ Total Users:** `{total_users}`\n"
+        f"**➜ Premium Users:** `{paid_users}`\n\n"
         f"💡 Use `/queue` to check download status"
     )
     await message.reply(stats_text)
