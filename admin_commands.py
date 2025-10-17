@@ -229,17 +229,23 @@ async def admin_stats_command(client: Client, message: Message, queue_manager=No
             queue_size = len(queue_manager.waiting_queue)
 
         stats_text = (
-            "**📊 Admin Statistics**\n\n"
-            f"**👥 Users:**\n"
-            f"• Total Users: `{stats.get('total_users', 0)}`\n"
-            f"• Premium Users: `{stats.get('paid_users', 0)}`\n"
-            f"• Active Users (7 days): `{stats.get('active_users', 0)}`\n"
-            f"• New Users Today: `{stats.get('today_new_users', 0)}`\n"
-            f"• Administrators: `{stats.get('admin_count', 0)}`\n\n"
-            f"**📈 Activity:**\n"
-            f"• Downloads Today: `{stats.get('today_downloads', 0)}`\n"
-            f"• Active Downloads: `{active_downloads}`\n"
-            f"• Queue Size: `{queue_size}`\n"
+            "👑 **ADMIN DASHBOARD**\n"
+            "——————————————————————————\n\n"
+            "👥 **User Analytics:**\n"
+            f"📊 Total Users: `{stats.get('total_users', 0)}`\n"
+            f"💎 Premium Users: `{stats.get('paid_users', 0)}`\n"
+            f"🟢 Active (7d): `{stats.get('active_users', 0)}`\n"
+            f"🆕 New Today: `{stats.get('today_new_users', 0)}`\n"
+            f"🔐 Admins: `{stats.get('admin_count', 0)}`\n\n"
+            "📈 **Download Activity:**\n"
+            f"📥 Today: `{stats.get('today_downloads', 0)}`\n"
+            f"⚡ Active: `{active_downloads}`\n"
+            f"📋 Queue: `{queue_size}`\n\n"
+            "——————————————————————————\n\n"
+            "⚙️ **Quick Admin Actions:**\n"
+            "• `/killall` - Cancel all downloads\n"
+            "• `/broadcast` - Send message to all\n"
+            "• `/logs` - View bot logs"
         )
 
         await message.reply(stats_text)

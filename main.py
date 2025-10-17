@@ -766,19 +766,20 @@ async def stats(_, message: Message):
     
     bot_memory_mb = round(process.memory_info()[0] / 1024**2)
     cpu_percent = process.cpu_percent(interval=0.1)
-    
-    bot_stats = db.get_stats()
-    total_users = bot_stats.get('total_users', 0)
-    paid_users = bot_stats.get('paid_users', 0)
 
     stats_text = (
-        "**≧◉◡◉≦ Bot is Up and Running successfully.**\n\n"
-        f"**➜ Bot Uptime:** `{currentTime}`\n"
-        f"**➜ Bot Memory:** `{bot_memory_mb} MiB`\n"
-        f"**➜ Bot CPU:** `{cpu_percent}%`\n\n"
-        f"**➜ Total Users:** `{total_users}`\n"
-        f"**➜ Premium Users:** `{paid_users}`\n\n"
-        f"💡 Use `/queue` to check download status"
+        "🤖 **BOT STATUS**\n"
+        "—————————————————————\n\n"
+        "✨ **Status:** Online & Running\n\n"
+        "📊 **System Metrics:**\n"
+        f"⏱️ Uptime: `{currentTime}`\n"
+        f"💾 Memory: `{bot_memory_mb} MiB`\n"
+        f"⚡ CPU: `{cpu_percent}%`\n\n"
+        "—————————————————————\n\n"
+        "💡 **Quick Access:**\n"
+        "• `/queue` - Check downloads\n"
+        "• `/myinfo` - Your account\n"
+        "• `/help` - All commands"
     )
     await message.reply(stats_text)
 
@@ -903,7 +904,7 @@ async def broadcast_handler(client: Client, message: Message):
 
 @bot.on_message(filters.command("adminstats") & filters.private)
 async def admin_stats_handler(client: Client, message: Message):
-    await admin_stats_command(client, message, download_queue)
+    await admin_stats_command(client, message, queue_manager=download_queue)
 
 @bot.on_message(filters.command("getpremium") & filters.private)
 @register_user

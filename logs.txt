@@ -1,40 +1,18 @@
-[17-Oct-25 01:01:57 PM - INFO] - __init__() - Line 30: cache - Cache initialized: max_size=500, ttl=180s
-[17-Oct-25 01:01:58 PM - INFO] - __init__() - Line 34: database - Successfully connected to MongoDB!
-[17-Oct-25 01:01:58 PM - INFO] - init_database() - Line 66: database - Database indexes created successfully
-[17-Oct-25 01:01:58 PM - INFO] - __init__() - Line 27: ad_monetization - Monetag ad network configured with 0 ad slot(s)
-[17-Oct-25 01:01:58 PM - INFO] - _log() - Line 97: werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+[17-Oct-25 01:28:01 PM - INFO] - __init__() - Line 30: cache - Cache initialized: max_size=500, ttl=180s
+[17-Oct-25 01:28:03 PM - INFO] - __init__() - Line 34: database - Successfully connected to MongoDB!
+[17-Oct-25 01:28:05 PM - INFO] - init_database() - Line 66: database - Database indexes created successfully
+[17-Oct-25 01:28:05 PM - INFO] - __init__() - Line 27: ad_monetization - Monetag ad network configured with 0 ad slot(s)
+[17-Oct-25 01:28:05 PM - INFO] - _log() - Line 97: werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
  * Running on all addresses (0.0.0.0)
  * Running on http://127.0.0.1:5000
- * Running on http://172.31.76.98:5000
-[17-Oct-25 01:01:58 PM - INFO] - _log() - Line 97: werkzeug - [33mPress CTRL+C to quit[0m
-[17-Oct-25 01:01:59 PM - INFO] - _log() - Line 97: werkzeug - 172.31.76.98 - - [17/Oct/2025 13:01:59] "GET / HTTP/1.1" 200 -
-[17-Oct-25 01:02:01 PM - INFO] - __init__() - Line 36: queue_manager - Queue Manager initialized: 20 concurrent, 100 max queue
-[17-Oct-25 01:02:01 PM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
-[17-Oct-25 01:02:01 PM - INFO] - start_bot() - Line 108: __main__ - Starting Telegram bot from server.py (long polling)
-[17-Oct-25 01:02:01 PM - INFO] - start_processor() - Line 42: queue_manager - Queue processor started
-[17-Oct-25 01:02:01 PM - INFO] - _init_queue() - Line 1204: main - Download queue processor initialized
-[17-Oct-25 01:02:08 PM - INFO] - start_bot() - Line 110: __main__ - Bot started successfully, waiting for updates...
-[17-Oct-25 01:02:12 PM - ERROR] - _handle_exception() - Line 433: pyrogram.dispatcher - Unhandled exception: admin_stats_command() takes 2 positional arguments but 3 were given
-Traceback (most recent call last):
-  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pyrogram/dispatcher.py", line 378, in _dispatch_to_handlers
-    await self._execute_handler(handler, *args)
-  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pyrogram/dispatcher.py", line 405, in _execute_handler
-    await handler.callback(self.client, *args)
-  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pyrogram/handlers/message_handler.py", line 154, in resolve_future_or_callback
-    await self.original_callback(client, message, *args)
-  File "/home/runner/workspace/main.py", line 906, in admin_stats_handler
-    await admin_stats_command(client, message, download_queue)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-TypeError: admin_stats_command() takes 2 positional arguments but 3 were given
-[17-Oct-25 01:02:18 PM - ERROR] - _handle_exception() - Line 433: pyrogram.dispatcher - Unhandled exception: admin_stats_command() takes 2 positional arguments but 3 were given
-Traceback (most recent call last):
-  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pyrogram/dispatcher.py", line 378, in _dispatch_to_handlers
-    await self._execute_handler(handler, *args)
-  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pyrogram/dispatcher.py", line 405, in _execute_handler
-    await handler.callback(self.client, *args)
-  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pyrogram/handlers/message_handler.py", line 154, in resolve_future_or_callback
-    await self.original_callback(client, message, *args)
-  File "/home/runner/workspace/main.py", line 906, in admin_stats_handler
-    await admin_stats_command(client, message, download_queue)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-TypeError: admin_stats_command() takes 2 positional arguments but 3 were given
+ * Running on http://172.31.111.130:5000
+[17-Oct-25 01:28:05 PM - INFO] - _log() - Line 97: werkzeug - [33mPress CTRL+C to quit[0m
+[17-Oct-25 01:28:06 PM - INFO] - __init__() - Line 36: queue_manager - Queue Manager initialized: 20 concurrent, 100 max queue
+[17-Oct-25 01:28:06 PM - INFO] - start_processor() - Line 42: queue_manager - Queue processor started
+[17-Oct-25 01:28:06 PM - INFO] - _init_queue() - Line 1205: main - Download queue processor initialized
+[17-Oct-25 01:28:06 PM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
+[17-Oct-25 01:28:06 PM - INFO] - start_bot() - Line 108: __main__ - Starting Telegram bot from server.py (long polling)
+[17-Oct-25 01:28:07 PM - INFO] - _log() - Line 97: werkzeug - 172.31.111.130 - - [17/Oct/2025 13:28:07] "GET / HTTP/1.1" 200 -
+[17-Oct-25 01:28:13 PM - INFO] - start_bot() - Line 110: __main__ - Bot started successfully, waiting for updates...
+[17-Oct-25 01:28:55 PM - INFO] - _log() - Line 97: werkzeug - 172.31.111.130 - - [17/Oct/2025 13:28:55] "GET / HTTP/1.1" 200 -
+[17-Oct-25 01:30:14 PM - INFO] - _log() - Line 97: werkzeug - 172.31.111.130 - - [17/Oct/2025 13:30:14] "GET / HTTP/1.1" 200 -

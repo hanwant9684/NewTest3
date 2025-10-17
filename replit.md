@@ -137,3 +137,46 @@ Implemented comprehensive performance improvements to ensure fast response times
 - Memory footprint: Reduced by ~40% on constrained platforms
 - Response time: Improved by 2-3x for commands with admin/ban checks
 - Platform compatibility: Works efficiently on both Render (512MB) and Replit environments
+
+### Stats Command Improvements (October 17, 2025)
+Reorganized bot statistics display to separate user-facing and admin-only metrics:
+
+**Changes Made:**
+- Removed "Total Users" and "Premium Users" from public `/stats` command
+- These metrics now only appear in admin-only `/adminstats` command
+- Fixed decorator issue: Updated `@admin_only` and `@paid_or_admin_only` decorators to accept and forward `*args, **kwargs`
+- Fixed `/adminstats` handler to pass `queue_manager` as keyword argument
+
+**Bug Fix:**
+- Resolved TypeError in `/adminstats` command that prevented it from displaying queue statistics
+- Decorators now properly forward additional parameters to wrapped functions
+
+**Result:**
+- Public `/stats` command shows: bot uptime, memory usage, CPU usage
+- Admin `/adminstats` command shows: all user metrics, queue stats, download statistics
+- Both commands working correctly with proper access control
+
+### UI Modernization & Documentation (October 17, 2025)
+Modernized command UI and created comprehensive documentation:
+
+**Stats Command Modernization:**
+- Updated `/stats` command with modern emoji-based UI layout
+- Clean design with status indicators, system metrics, and quick access links
+- Telegram-compatible markdown formatting (no special box-drawing characters)
+
+**Admin Dashboard Modernization:**
+- Updated `/adminstats` command with professional admin dashboard UI
+- Categorized metrics: User Analytics, Download Activity, Quick Admin Actions
+- Enhanced readability with emojis and structured layout
+
+**Documentation:**
+- Created `COMMANDS_LIST.md` with comprehensive command reference
+- Organized all 30+ commands by category (Downloads, Auth, Queue, Premium, Admin, etc.)
+- Included usage examples and feature descriptions
+- Added quick reference for user tiers (Free, Premium, Admin)
+
+**Render Deployment Confirmation:**
+- Confirmed bot is fully optimized for Render's 512MB RAM environment
+- Existing optimizations: workers=1, caching (LRU 500 items/180s TTL), connection pooling (maxPoolSize=10)
+- Platform auto-detection works for both Replit and Render
+- No additional tuning needed - architecture is production-ready

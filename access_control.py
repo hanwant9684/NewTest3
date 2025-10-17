@@ -32,7 +32,7 @@ async def _register_and_check_user(message: Message) -> tuple[int, bool]:
 def admin_only(func):
     """Decorator to restrict command to admins only (optimized)"""
     @wraps(func)
-    async def wrapper(client, message: Message):
+    async def wrapper(client, message: Message, *args, **kwargs):
         user_id, is_banned = await _register_and_check_user(message)
         
         if is_banned:
@@ -44,13 +44,13 @@ def admin_only(func):
             await message.reply("❌ **This command is restricted to administrators only.**")
             return
 
-        return await func(client, message)
+        return await func(client, message, *args, **kwargs)
     return wrapper
 
 def paid_or_admin_only(func):
     """Decorator to restrict command to paid users and admins (optimized)"""
     @wraps(func)
-    async def wrapper(client, message: Message):
+    async def wrapper(client, message: Message, *args, **kwargs):
         user_id, is_banned = await _register_and_check_user(message)
         
         if is_banned:
@@ -71,7 +71,7 @@ def paid_or_admin_only(func):
             )
             return
 
-        return await func(client, message)
+        return await func(client, message, *args, **kwargs)
     return wrapper
 
 def check_download_limit(func):
