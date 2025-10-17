@@ -24,7 +24,8 @@ from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, 
 from helpers.utils import (
     processMediaGroup,
     progressArgs,
-    send_media
+    send_media,
+    safe_progress_callback
 )
 
 from helpers.files import (
@@ -365,7 +366,7 @@ async def handle_download(bot: Client, message: Message, post_url: str, user_cli
 
             media_path = await chat_message.download(
                 file_name=download_path,
-                progress=Leaves.progress_for_pyrogram,
+                progress=safe_progress_callback,
                 progress_args=progressArgs(
                     "📥 Downloading Progress", progress_message, start_time
                 ),

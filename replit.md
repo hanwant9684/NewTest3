@@ -58,6 +58,35 @@ The bot operates as a backend Telegram bot, primarily interacting with users via
 
 ## Recent Changes
 
+### Message Duplication Fix (October 17, 2025)
+Fixed critical issue where the bot was sending duplicate status messages due to Telegram message editing errors:
+
+**Problem:**
+- The Pyleaves progress library tried to edit progress messages to show download/upload status
+- When messages were deleted (manually or due to errors), it threw `MessageIdInvalid` errors
+- Error handling was creating new messages instead of failing silently, causing message spam
+
+**Solution:**
+- Created `safe_progress_callback()` wrapper around `Leaves.progress_for_pyrogram`
+- Catches and silently ignores message editing errors (`message_id_invalid`, `message not found`, etc.)
+- Prevents duplicate messages while maintaining progress functionality
+- Applied to all download/upload operations across the codebase
+
+**Files Updated:**
+- `helpers/utils.py`: Added safe progress wrapper, replaced all Leaves.progress_for_pyrogram calls
+- `main.py`: Updated imports and replaced progress callback
+
+**Result:**
+- No more duplicate status messages in Telegram
+- Progress bars still work correctly
+- Graceful handling of deleted/invalid messages
+- Architect-reviewed and approved ✅
+
+**Future Improvements (Optional):**
+- Consider using specific Pyrogram exception classes instead of string matching for long-term robustness
+- Monitor logs during live runs for any unexpected progress warnings
+- Important: Always use `safe_progress_callback` for all new download/upload operations (never use raw `Leaves.progress_for_pyrogram`)
+
 ### Replit Environment Setup (October 17, 2025)
 Successfully configured the Telegram bot to run in the Replit environment:
 
