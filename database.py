@@ -7,6 +7,7 @@ from typing import Optional, List, Dict
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure, OperationFailure
 from logger import LOGGER
+from cache import get_cache
 
 class DatabaseManager:
     def __init__(self, connection_string: Optional[str] = None):
@@ -17,11 +18,23 @@ class DatabaseManager:
             raise ValueError("MongoDB connection string is required. Set MONGODB_URI environment variable.")
         
         try:
-            self.client = MongoClient(connection_string)
+            # Optimized connection settings for Render/Replit
+            self.client = MongoClient(
+                connection_string,
+                maxPoolSize=10,  # Limit connections for 512MB RAM
+                minPoolSize=1,
+                maxIdleTimeMS=45000,  # Close idle connections
+                serverSelectionTimeoutMS=5000,  # Faster timeout
+                connectTimeoutMS=10000,
+                socketTimeoutMS=10000,
+                retryWrites=True,
+                w='majority'
+            )
             self.client.admin.command('ping')
             LOGGER(__name__).info("Successfully connected to MongoDB!")
             
             self.db = self.client.get_database("telegram_bot")
+            self.cache = get_cache()
             
             self.users = self.db['users']
             self.daily_usage = self.db['daily_usage']
@@ -101,11 +114,17 @@ class DatabaseManager:
             return False
 
     def get_user(self, user_id: int) -> Optional[Dict]:
-        """Get user information"""
+        """Get user information (with caching)"""
+        cache_key = f"user_{user_id}"
+        cached = self.cache.get(cache_key)
+        if cached is not None:
+            return cached
+        
         try:
             user = self.users.find_one({"user_id": user_id})
             if user:
                 user.pop('_id', None)
+                self.cache.set(cache_key, user, ttl=180)  # Cache for 3 minutes
             return user
         except Exception as e:
             LOGGER(__name__).error(f"Error getting user {user_id}: {e}")
@@ -144,10 +163,17 @@ class DatabaseManager:
         return 'free'
 
     def is_admin(self, user_id: int) -> bool:
-        """Check if user is admin"""
+        """Check if user is admin (with caching)"""
+        cache_key = f"admin_{user_id}"
+        cached = self.cache.get(cache_key)
+        if cached is not None:
+            return cached
+        
         try:
             admin = self.admins.find_one({"user_id": user_id})
-            return admin is not None
+            is_admin = admin is not None
+            self.cache.set(cache_key, is_admin, ttl=300)  # Cache for 5 minutes
+            return is_admin
         except Exception as e:
             LOGGER(__name__).error(f"Error checking admin status for {user_id}: {e}")
             return False
@@ -165,6 +191,9 @@ class DatabaseManager:
                 {"$set": admin_doc},
                 upsert=True
             )
+            # Invalidate cache
+            self.cache.delete(f"admin_{user_id}")
+            self.cache.delete(f"user_{user_id}")
             return True
         except Exception as e:
             LOGGER(__name__).error(f"Error adding admin {user_id}: {e}")
@@ -174,6 +203,9 @@ class DatabaseManager:
         """Remove admin privileges"""
         try:
             result = self.admins.delete_one({"user_id": user_id})
+            # Invalidate cache
+            self.cache.delete(f"admin_{user_id}")
+            self.cache.delete(f"user_{user_id}")
             return result.deleted_count > 0
         except Exception as e:
             LOGGER(__name__).error(f"Error removing admin {user_id}: {e}")
@@ -409,6 +441,9 @@ class DatabaseManager:
                 {"user_id": user_id},
                 {"$set": {"is_banned": True}}
             )
+            # Invalidate cache
+            self.cache.delete(f"banned_{user_id}")
+            self.cache.delete(f"user_{user_id}")
             return result.modified_count > 0
         except Exception as e:
             LOGGER(__name__).error(f"Error banning user {user_id}: {e}")
@@ -421,15 +456,25 @@ class DatabaseManager:
                 {"user_id": user_id},
                 {"$set": {"is_banned": False}}
             )
+            # Invalidate cache
+            self.cache.delete(f"banned_{user_id}")
+            self.cache.delete(f"user_{user_id}")
             return result.modified_count > 0
         except Exception as e:
             LOGGER(__name__).error(f"Error unbanning user {user_id}: {e}")
             return False
 
     def is_banned(self, user_id: int) -> bool:
-        """Check if user is banned"""
+        """Check if user is banned (with caching)"""
+        cache_key = f"banned_{user_id}"
+        cached = self.cache.get(cache_key)
+        if cached is not None:
+            return cached
+        
         user = self.get_user(user_id)
-        return bool(user and user.get('is_banned', False))
+        is_banned = bool(user and user.get('is_banned', False))
+        self.cache.set(cache_key, is_banned, ttl=300)  # Cache for 5 minutes
+        return is_banned
 
     def set_user_session(self, user_id: int, session_string: Optional[str] = None) -> bool:
         """Set user's session string for accessing restricted content (None to logout)"""

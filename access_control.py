@@ -9,26 +9,37 @@ from database import db
 from logger import LOGGER
 from config import PyroConf
 
+# Helper function to avoid redundant DB calls in decorators
+async def _register_and_check_user(message: Message) -> tuple[int, bool]:
+    """
+    Register user and check ban status in one go.
+    Returns (user_id, is_banned)
+    """
+    user_id = message.from_user.id
+    
+    # Add user to database if not exists
+    db.add_user(
+        user_id=user_id,
+        username=message.from_user.username,
+        first_name=message.from_user.first_name,
+        last_name=message.from_user.last_name
+    )
+    
+    # Check if banned (uses cache)
+    is_banned = db.is_banned(user_id)
+    return user_id, is_banned
+
 def admin_only(func):
-    """Decorator to restrict command to admins only"""
+    """Decorator to restrict command to admins only (optimized)"""
     @wraps(func)
     async def wrapper(client, message: Message):
-        user_id = message.from_user.id
-
-        # Add user to database if not exists
-        db.add_user(
-            user_id=user_id,
-            username=message.from_user.username,
-            first_name=message.from_user.first_name,
-            last_name=message.from_user.last_name
-        )
-
-        # Check if banned
-        if db.is_banned(user_id):
+        user_id, is_banned = await _register_and_check_user(message)
+        
+        if is_banned:
             await message.reply("❌ **You are banned from using this bot.**")
             return
 
-        # Check admin status
+        # Check admin status (uses cache)
         if not db.is_admin(user_id):
             await message.reply("❌ **This command is restricted to administrators only.**")
             return
@@ -37,21 +48,12 @@ def admin_only(func):
     return wrapper
 
 def paid_or_admin_only(func):
-    """Decorator to restrict command to paid users and admins"""
+    """Decorator to restrict command to paid users and admins (optimized)"""
     @wraps(func)
     async def wrapper(client, message: Message):
-        user_id = message.from_user.id
-
-        # Add user to database if not exists
-        db.add_user(
-            user_id=user_id,
-            username=message.from_user.username,
-            first_name=message.from_user.first_name,
-            last_name=message.from_user.last_name
-        )
-
-        # Check if banned
-        if db.is_banned(user_id):
+        user_id, is_banned = await _register_and_check_user(message)
+        
+        if is_banned:
             await message.reply("❌ **You are banned from using this bot.**")
             return
 
@@ -73,21 +75,12 @@ def paid_or_admin_only(func):
     return wrapper
 
 def check_download_limit(func):
-    """Decorator to check download limits for free users"""
+    """Decorator to check download limits for free users (optimized)"""
     @wraps(func)
     async def wrapper(client, message: Message):
-        user_id = message.from_user.id
-
-        # Add user to database if not exists
-        db.add_user(
-            user_id=user_id,
-            username=message.from_user.username,
-            first_name=message.from_user.first_name,
-            last_name=message.from_user.last_name
-        )
-
-        # Check if banned
-        if db.is_banned(user_id):
+        user_id, is_banned = await _register_and_check_user(message)
+        
+        if is_banned:
             await message.reply("❌ **You are banned from using this bot.**")
             return
 
@@ -115,21 +108,12 @@ def check_download_limit(func):
     return wrapper
 
 def register_user(func):
-    """Decorator to register user in database"""
+    """Decorator to register user in database (optimized)"""
     @wraps(func)
     async def wrapper(client, message: Message):
-        user_id = message.from_user.id
-
-        # Add user to database if not exists
-        db.add_user(
-            user_id=user_id,
-            username=message.from_user.username,
-            first_name=message.from_user.first_name,
-            last_name=message.from_user.last_name
-        )
-
-        # Check if banned
-        if db.is_banned(user_id):
+        user_id, is_banned = await _register_and_check_user(message)
+        
+        if is_banned:
             await message.reply("❌ **You are banned from using this bot.**")
             return
 
@@ -142,20 +126,25 @@ async def check_user_session(user_id: int):
     return session is not None
 
 async def get_user_client(user_id: int):
-    """Get user's personal client if they have session"""
+    """Get user's personal client if they have session (optimized)"""
     session = db.get_user_session(user_id)
     if session:
         from pyrogram import Client
         from config import PyroConf
+        import os
 
         try:
+            # Optimize resources for constrained environments
+            IS_CONSTRAINED = bool(os.getenv('RENDER') or os.getenv('RENDER_EXTERNAL_URL') or os.getenv('REPLIT_DEPLOYMENT') or os.getenv('REPL_ID'))
+            
             user_client = Client(
                 f"user_{user_id}",
                 api_id=PyroConf.API_ID,
                 api_hash=PyroConf.API_HASH,
                 session_string=session,
-                workers=8,
-                max_concurrent_transmissions=8,
+                workers=1 if IS_CONSTRAINED else 2,
+                max_concurrent_transmissions=2 if IS_CONSTRAINED else 4,
+                sleep_threshold=30,
                 in_memory=True  # Use in-memory sessions to avoid file leaks
             )
             await user_client.start()

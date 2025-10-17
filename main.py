@@ -61,11 +61,15 @@ from admin_commands import (
 )
 from queue_manager import download_queue
 
-# Initialize the bot client with settings optimized for Render's 512MB RAM
-# Reduced workers/transmissions to save memory and bandwidth
-RENDER_OPTIMIZED = os.getenv('RENDER', False) or os.getenv('RENDER_EXTERNAL_URL', False)
-workers = 2 if RENDER_OPTIMIZED else 8
-concurrent = 2 if RENDER_OPTIMIZED else 8
+# Initialize the bot client with settings optimized for Render's 512MB RAM / Replit resource limits
+# Detect platform for optimal resource allocation
+IS_RENDER = bool(os.getenv('RENDER') or os.getenv('RENDER_EXTERNAL_URL'))
+IS_REPLIT = bool(os.getenv('REPLIT_DEPLOYMENT') or os.getenv('REPL_ID'))
+IS_CONSTRAINED = IS_RENDER or IS_REPLIT  # Low RAM environments
+
+# Aggressively reduce workers for constrained environments
+workers = 1 if IS_CONSTRAINED else 4
+concurrent = 2 if IS_CONSTRAINED else 4
 
 bot = Client(
     "media_bot",
@@ -75,6 +79,8 @@ bot = Client(
     workers=workers,
     max_concurrent_transmissions=concurrent,
     parse_mode=ParseMode.MARKDOWN,
+    sleep_threshold=30,  # Reduce API call frequency
+    in_memory=True  # Don't write session files to disk
 )
 
 # Client for user session (optional fallback) with optimized settings
@@ -82,7 +88,9 @@ user = Client(
     "user_session", 
     workers=workers,
     max_concurrent_transmissions=concurrent,
-    session_string=PyroConf.SESSION_STRING
+    session_string=PyroConf.SESSION_STRING,
+    sleep_threshold=30,
+    in_memory=True
 ) if PyroConf.SESSION_STRING else None
 
 # Phone authentication handler

@@ -20,14 +20,19 @@ class PhoneAuthHandler:
         Returns: (success: bool, message: str, phone_code_hash: str or None)
         """
         try:
+            # Use minimal resources for auth clients to save RAM
+            IS_CONSTRAINED = bool(os.getenv('RENDER') or os.getenv('RENDER_EXTERNAL_URL') or os.getenv('REPLIT_DEPLOYMENT') or os.getenv('REPL_ID'))
+            
             session_name = f"user_{user_id}"
 
             client = Client(
                 session_name,
                 api_id=self.api_id,
                 api_hash=self.api_hash,
-                workers=8,
-                max_concurrent_transmissions=8
+                workers=1 if IS_CONSTRAINED else 2,
+                max_concurrent_transmissions=1 if IS_CONSTRAINED else 2,
+                sleep_threshold=30,
+                in_memory=True  # Don't write to disk - saves I/O and cleanup
             )
 
             await client.connect()
