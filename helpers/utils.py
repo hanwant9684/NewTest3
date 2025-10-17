@@ -168,6 +168,23 @@ async def get_video_thumbnail(video_file, duration):
     return output
 
 
+# Safe progress wrapper to handle deleted messages
+async def safe_progress_callback(current, total, *args):
+    """
+    Wrapper around Pyleaves progress that catches MessageIdInvalid errors
+    to prevent duplicate messages when progress messages are deleted
+    """
+    try:
+        await Leaves.progress_for_pyrogram(current, total, *args)
+    except Exception as e:
+        error_str = str(e)
+        # Silently ignore errors related to deleted or invalid messages
+        if any(err in error_str.lower() for err in ['message_id_invalid', 'message not found', 'message to edit not found', 'message can\'t be edited']):
+            LOGGER(__name__).debug(f"Progress message was deleted or invalid, ignoring: {e}")
+        else:
+            # Log other errors but don't raise to avoid interrupting downloads
+            LOGGER(__name__).warning(f"Progress callback error: {e}")
+
 # Generate progress bar for downloading/uploading
 def progressArgs(action: str, progress_message, start_time):
     return (action, progress_message, start_time, PROGRESS_BAR, "▓", "░")
@@ -188,7 +205,7 @@ async def send_media(
         await message.reply_photo(
             media_path,
             caption=caption or "",
-            progress=Leaves.progress_for_pyrogram,
+            progress=safe_progress_callback,
             progress_args=progress_args,
         )
     elif media_type == "video":
@@ -270,7 +287,7 @@ async def send_media(
             "height": height,
             "thumb": thumb,
             "caption": caption or "",
-            "progress": Leaves.progress_for_pyrogram,
+            "progress": safe_progress_callback,
             "progress_args": progress_args,
         }
         if duration > 0:
@@ -336,14 +353,14 @@ async def send_media(
             performer=artist,
             title=title,
             caption=caption or "",
-            progress=Leaves.progress_for_pyrogram,
+            progress=safe_progress_callback,
             progress_args=progress_args,
         )
     elif media_type == "document":
         await message.reply_document(
             media_path,
             caption=caption or "",
-            progress=Leaves.progress_for_pyrogram,
+            progress=safe_progress_callback,
             progress_args=progress_args,
         )
 
@@ -364,7 +381,7 @@ async def processMediaGroup(chat_message, bot, message):
         if msg.photo or msg.video or msg.document or msg.audio:
             try:
                 media_path = await msg.download(
-                    progress=Leaves.progress_for_pyrogram,
+                    progress=safe_progress_callback,
                     progress_args=progressArgs(
                         "📥 Downloading Progress", progress_message, start_time
                     ),
