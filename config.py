@@ -31,7 +31,7 @@ class PyroConf:
     ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "")
     PAYPAL_URL = os.getenv("PAYPAL_URL", "")
     UPI_ID = os.getenv("UPI_ID", "")
-    AMAZON_PAY_ID = os.getenv("AMAZON_PAY_ID", "")
+    TELEGRAM_TON= os.getenv("TELEGRAM_TON", "")
     CRYPTO_ADDRESS = os.getenv("CRYPTO_ADDRESS", "")
     
     # Monetag Ad Monetization - Up to 10 Ad Slots (Legacy - for Monetag zones)

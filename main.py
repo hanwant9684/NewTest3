@@ -1032,7 +1032,7 @@ async def upgrade_command(client: Client, message: Message):
     )
     
     # Add payment information if configured
-    payment_methods_available = PyroConf.PAYPAL_URL or PyroConf.UPI_ID or PyroConf.AMAZON_PAY_ID or PyroConf.CRYPTO_ADDRESS
+    payment_methods_available = PyroConf.PAYPAL_URL or PyroConf.UPI_ID or PyroConf.TELEGRAM_TON or PyroConf.CRYPTO_ADDRESS
     
     if payment_methods_available:
         upgrade_text += "1️⃣ **Make Payment (Choose any method):**\n"
@@ -1043,8 +1043,8 @@ async def upgrade_command(client: Client, message: Message):
         if PyroConf.UPI_ID:
             upgrade_text += f"   📱 **UPI (India):** `{PyroConf.UPI_ID}`\n"
         
-        if PyroConf.AMAZON_PAY_ID:
-            upgrade_text += f"   🛒 **Amazon Pay/Gift Card:** `{PyroConf.AMAZON_PAY_ID}`\n"
+        if PyroConf.TELEGRAM_TON:
+            upgrade_text += f"   🛒 **Telegram Pay (TON):** `{PyroConf.TELEGRAM_TON}`\n"
         
         if PyroConf.CRYPTO_ADDRESS:
             upgrade_text += f"   ₿ **Crypto (USDT/BTC/ETH):** `{PyroConf.CRYPTO_ADDRESS}`\n"
@@ -1161,7 +1161,7 @@ async def callback_handler(client: Client, callback_query: CallbackQuery):
             "**How to Subscribe:**\n"
         )
         
-        payment_methods_available = PyroConf.PAYPAL_URL or PyroConf.UPI_ID or PyroConf.AMAZON_PAY_ID or PyroConf.CRYPTO_ADDRESS
+        payment_methods_available = PyroConf.PAYPAL_URL or PyroConf.UPI_ID or PyroConf.TELEGRAM_TON or PyroConf.CRYPTO_ADDRESS
         
         if payment_methods_available:
             upgrade_text += "1️⃣ **Make Payment (Choose any method):**\n"
@@ -1172,8 +1172,8 @@ async def callback_handler(client: Client, callback_query: CallbackQuery):
             if PyroConf.UPI_ID:
                 upgrade_text += f"   📱 **UPI (India):** `{PyroConf.UPI_ID}`\n"
             
-            if PyroConf.AMAZON_PAY_ID:
-                upgrade_text += f"   🛒 **Amazon Pay/Gift Card:** `{PyroConf.AMAZON_PAY_ID}`\n"
+            if PyroConf.TELEGRAM_TON:
+                upgrade_text += f"   🛒 **Telegram Pay (TON):** `{PyroConf.TELEGRAM_TON}`\n"
             
             if PyroConf.CRYPTO_ADDRESS:
                 upgrade_text += f"   ₿ **Crypto (USDT/BTC/ETH):** `{PyroConf.CRYPTO_ADDRESS}`\n"
