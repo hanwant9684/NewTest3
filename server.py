@@ -25,28 +25,9 @@ def index():
 
 @app.route('/health')
 def health():
-    """
-    Health check endpoint for Render monitoring
-    Returns 204 if bot is connected, 503 if disconnected (triggers Render alerts)
-    """
-    global bot_connected, last_heartbeat_time
-    from time import time as current_time
-    
-    # Check if bot is connected and heartbeat is recent (within 15 minutes)
-    # Relaxed window tolerates one missed heartbeat (5min interval + margin)
-    heartbeat_age = current_time() - last_heartbeat_time
-    is_healthy = bot_connected and heartbeat_age < 900
-    
-    if is_healthy:
-        # HTTP 204 No Content = healthy, minimal bandwidth
-        return '', 204
-    else:
-        # HTTP 503 Service Unavailable = unhealthy, triggers Render alerts
-        return jsonify({
-            'status': 'unhealthy',
-            'bot_connected': bot_connected,
-            'last_heartbeat_age': int(heartbeat_age)
-        }), 503
+    # Return minimal response to save bandwidth (8,640 pings/month from UptimeRobot)
+    # HTTP 204 No Content = 0 bytes body vs JSON = ~20 bytes
+    return '', 204
 
 @app.route('/watch-ad')
 def watch_ad():
@@ -103,9 +84,8 @@ def verify_session():
     })
 
 def run_bot():
-    """Run the Telegram bot in a background thread with long polling and auto-reconnection"""
+    """Run the Telegram bot in a background thread with long polling"""
     import asyncio
-    from time import time as current_time
     
     # Set uvloop policy for better performance (before creating loop)
     try:
@@ -122,118 +102,20 @@ def run_bot():
     # Now import main - Pyrogram will see the event loop
     import main
     
-    # Global variable to track bot connection status for /health endpoint
-    global bot_connected, last_heartbeat_time
-    bot_connected = False
-    last_heartbeat_time = current_time()
+    async def start_bot():
+        """Start bot without signal handlers (thread-safe)"""
+        try:
+            main.LOGGER(__name__).info("Starting Telegram bot from server.py (long polling)")
+            await main.bot.start()
+            main.LOGGER(__name__).info("Bot started successfully, waiting for updates...")
+            # Keep the bot running without signal handlers (thread-safe alternative to idle())
+            await asyncio.Event().wait()
+        finally:
+            await main.bot.stop()
+            main.LOGGER(__name__).info("Bot stopped")
     
-    async def idle_with_heartbeat():
-        """Keep bot alive and monitor connection health with periodic heartbeats"""
-        global bot_connected, last_heartbeat_time
-        heartbeat_interval = 300  # Check connection every 5 minutes
-        heartbeat_failures = 0
-        max_failures = 2
-        
-        while True:
-            try:
-                await asyncio.sleep(heartbeat_interval)
-                
-                # Heartbeat: check if bot is still connected
-                if hasattr(main.bot, 'is_connected') and main.bot.is_connected:
-                    # Try a lightweight API call to verify connection
-                    await main.bot.get_me()
-                    bot_connected = True
-                    last_heartbeat_time = current_time()
-                    heartbeat_failures = 0
-                    main.LOGGER(__name__).debug(f"Heartbeat: Bot connection healthy")
-                else:
-                    raise ConnectionError("Bot is not connected")
-                    
-            except Exception as e:
-                heartbeat_failures += 1
-                bot_connected = False
-                main.LOGGER(__name__).warning(f"Heartbeat failed ({heartbeat_failures}/{max_failures}): {e}")
-                
-                if heartbeat_failures >= max_failures:
-                    main.LOGGER(__name__).error("Heartbeat failed too many times, triggering reconnection")
-                    raise ConnectionError("Heartbeat monitoring detected connection loss")
-    
-    async def run_bot_forever():
-        """Run bot with automatic reconnection on timeout/network errors"""
-        global bot_connected, last_heartbeat_time
-        retry_count = 0
-        base_delay = 5  # Start with 5 seconds
-        max_delay = 300  # Cap at 5 minutes
-        stable_run_threshold = 900  # 15 minutes of stable operation resets backoff
-        
-        while True:
-            start_time = current_time()
-            current_delay = min(base_delay * (2 ** retry_count), max_delay)
-            
-            try:
-                main.LOGGER(__name__).info(f"Starting Telegram bot (attempt {retry_count + 1})")
-                await main.bot.start()
-                bot_connected = True
-                last_heartbeat_time = current_time()  # Initialize heartbeat timestamp on successful start
-                main.LOGGER(__name__).info("Bot started successfully, monitoring connection...")
-                
-                # Run bot with heartbeat monitoring
-                await idle_with_heartbeat()
-                
-            except (TimeoutError, OSError, ConnectionError) as e:
-                # Network/timeout errors - expected on Render, retry with backoff
-                bot_connected = False
-                retry_count += 1
-                
-                main.LOGGER(__name__).warning(
-                    f"Bot connection error (attempt {retry_count}): {type(e).__name__}: {e}. "
-                    f"Retrying in {current_delay}s..."
-                )
-                
-                # Graceful shutdown before retry
-                try:
-                    if main.bot.is_connected:
-                        await main.bot.stop()
-                except:
-                    pass
-                
-                await asyncio.sleep(current_delay)
-                
-            except Exception as e:
-                # Unexpected errors - log and retry with backoff
-                bot_connected = False
-                retry_count += 1
-                
-                main.LOGGER(__name__).error(
-                    f"Unexpected bot error (attempt {retry_count}): {type(e).__name__}: {e}. "
-                    f"Retrying in {current_delay}s...",
-                    exc_info=True
-                )
-                
-                # Graceful shutdown before retry
-                try:
-                    if main.bot.is_connected:
-                        await main.bot.stop()
-                except:
-                    pass
-                
-                await asyncio.sleep(current_delay)
-            
-            finally:
-                # Check if bot ran stably for threshold period - reset backoff
-                run_duration = current_time() - start_time
-                if run_duration >= stable_run_threshold:
-                    main.LOGGER(__name__).info(
-                        f"Bot ran stably for {run_duration:.0f}s, resetting reconnection backoff"
-                    )
-                    retry_count = 0
-    
-    # Run the resilient bot loop
-    loop.run_until_complete(run_bot_forever())
-
-# Global variables for bot status tracking
-bot_connected = False
-last_heartbeat_time = 0
+    # Run the async coroutine on this thread's event loop
+    loop.run_until_complete(start_bot())
 
 # Start bot process when app initializes (for Gunicorn workers)
 import threading
