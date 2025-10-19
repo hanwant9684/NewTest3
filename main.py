@@ -80,8 +80,9 @@ bot = Client(
     workers=workers,
     max_concurrent_transmissions=concurrent,
     parse_mode=ParseMode.MARKDOWN,
-    sleep_threshold=30,  # Reduce API call frequency
+    sleep_threshold=30 if IS_CONSTRAINED else 60,  # Reduce API call frequency
     in_memory=True  # Don't write session files to disk
+    # Note: Connection resilience handled by server.py's run_bot_forever() with exponential backoff
 )
 
 # Client for user session (optional fallback) with optimized settings
@@ -90,7 +91,7 @@ user = Client(
     workers=workers,
     max_concurrent_transmissions=concurrent,
     session_string=PyroConf.SESSION_STRING,
-    sleep_threshold=30,
+    sleep_threshold=30 if IS_CONSTRAINED else 60,
     in_memory=True
 ) if PyroConf.SESSION_STRING else None
 
