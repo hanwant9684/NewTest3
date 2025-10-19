@@ -1,17 +1,19 @@
-[19-Oct-25 01:48:17 PM - INFO] - __init__() - Line 30: cache - Cache initialized: max_size=500, ttl=180s
-[19-Oct-25 01:48:19 PM - INFO] - __init__() - Line 34: database - Successfully connected to MongoDB!
-[19-Oct-25 01:48:21 PM - INFO] - init_database() - Line 66: database - Database indexes created successfully
-[19-Oct-25 01:48:21 PM - INFO] - __init__() - Line 27: ad_monetization - Monetag ad network configured with 0 ad slot(s)
-[19-Oct-25 01:48:21 PM - INFO] - _log() - Line 97: werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+[19-Oct-25 02:11:44 PM - INFO] - __init__() - Line 30: cache - Cache initialized: max_size=500, ttl=180s
+[19-Oct-25 02:11:46 PM - INFO] - __init__() - Line 34: database - Successfully connected to MongoDB!
+[19-Oct-25 02:11:48 PM - INFO] - init_database() - Line 66: database - Database indexes created successfully
+[19-Oct-25 02:11:48 PM - INFO] - __init__() - Line 27: ad_monetization - Monetag ad network configured with 0 ad slot(s)
+[19-Oct-25 02:11:48 PM - INFO] - _log() - Line 97: werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
  * Running on all addresses (0.0.0.0)
  * Running on http://127.0.0.1:5000
  * Running on http://172.31.87.34:5000
-[19-Oct-25 01:48:21 PM - INFO] - _log() - Line 97: werkzeug - [33mPress CTRL+C to quit[0m
-[19-Oct-25 01:48:22 PM - INFO] - __init__() - Line 36: queue_manager - Queue Manager initialized: 20 concurrent, 100 max queue
-[19-Oct-25 01:48:22 PM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
-[19-Oct-25 01:48:22 PM - INFO] - run_bot_forever() - Line 174: __main__ - Starting Telegram bot (attempt 1)
-[19-Oct-25 01:48:22 PM - INFO] - start_processor() - Line 42: queue_manager - Queue processor started
-[19-Oct-25 01:48:22 PM - INFO] - _init_queue() - Line 1207: main - Download queue processor initialized
-[19-Oct-25 01:48:22 PM - INFO] - _log() - Line 97: werkzeug - 172.31.87.34 - - [19/Oct/2025 13:48:22] "GET / HTTP/1.1" 200 -
-[19-Oct-25 01:48:28 PM - INFO] - run_bot_forever() - Line 178: __main__ - Bot started successfully, monitoring connection...
-[19-Oct-25 01:48:38 PM - INFO] - _log() - Line 97: werkzeug - 127.0.0.1 - - [19/Oct/2025 13:48:38] "[35m[1mGET /health HTTP/1.1[0m" 204 -
+[19-Oct-25 02:11:48 PM - INFO] - _log() - Line 97: werkzeug - [33mPress CTRL+C to quit[0m
+[19-Oct-25 02:11:48 PM - INFO] - _log() - Line 97: werkzeug - 127.0.0.1 - - [19/Oct/2025 14:11:48] "GET / HTTP/1.1" 200 -
+[19-Oct-25 02:11:49 PM - INFO] - __init__() - Line 36: queue_manager - Queue Manager initialized: 20 concurrent, 100 max queue
+[19-Oct-25 02:11:49 PM - INFO] - start_processor() - Line 42: queue_manager - Queue processor started
+[19-Oct-25 02:11:49 PM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
+[19-Oct-25 02:11:49 PM - INFO] - _init_queue() - Line 1207: main - Download queue processor initialized
+[19-Oct-25 02:11:49 PM - INFO] - run_bot_forever() - Line 174: __main__ - Starting Telegram bot (attempt 1)
+[19-Oct-25 02:11:54 PM - INFO] - _log() - Line 97: werkzeug - 172.31.87.34 - - [19/Oct/2025 14:11:54] "GET / HTTP/1.1" 200 -
+[19-Oct-25 02:11:55 PM - INFO] - _log() - Line 97: werkzeug - 127.0.0.1 - - [19/Oct/2025 14:11:55] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[19-Oct-25 02:11:55 PM - INFO] - run_bot_forever() - Line 178: __main__ - Bot started successfully, monitoring connection...
+[19-Oct-25 02:12:13 PM - INFO] - _log() - Line 97: werkzeug - 127.0.0.1 - - [19/Oct/2025 14:12:13] "[35m[1mGET /health HTTP/1.1[0m" 204 -
