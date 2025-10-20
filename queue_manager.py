@@ -1,4 +1,6 @@
+import os
 import asyncio
+import psutil
 from datetime import datetime
 from typing import Dict, Set, Optional, Tuple
 from dataclasses import dataclass, field
@@ -19,9 +21,10 @@ class QueueItem:
     post_url: str = field(compare=False)
 
 class DownloadQueueManager:
-    def __init__(self, max_concurrent: int = 20, max_queue: int = 100):
+    def __init__(self, max_concurrent: int = 20, max_queue: int = 100, memory_limit_mb: int = 400):
         self.max_concurrent = max_concurrent
         self.max_queue = max_queue
+        self.memory_limit_mb = memory_limit_mb  # Circuit breaker threshold (MB)
         
         self.active_downloads: Set[int] = set()
         self.waiting_queue: list[QueueItem] = []
@@ -33,7 +36,21 @@ class DownloadQueueManager:
         self._processing = False
         self._processor_task: Optional[asyncio.Task] = None
         
-        LOGGER(__name__).info(f"Queue Manager initialized: {max_concurrent} concurrent, {max_queue} max queue")
+        LOGGER(__name__).info(
+            f"Queue Manager initialized: {max_concurrent} concurrent, {max_queue} max queue, "
+            f"{memory_limit_mb}MB memory limit"
+        )
+    
+    def _check_memory_usage(self) -> tuple[bool, int]:
+        """Check if memory usage is within safe limits. Returns (is_safe, current_mb)"""
+        try:
+            process = psutil.Process()
+            memory_mb = process.memory_info().rss / 1024 / 1024
+            is_safe = memory_mb < self.memory_limit_mb
+            return is_safe, int(memory_mb)
+        except Exception as e:
+            LOGGER(__name__).warning(f"Failed to check memory usage: {e}")
+            return True, 0  # Assume safe if can't check
     
     async def start_processor(self):
         if not self._processing:
@@ -60,6 +77,19 @@ class DownloadQueueManager:
         is_premium: bool = False
     ) -> Tuple[bool, str]:
         async with self._lock:
+            # Circuit breaker: Check memory usage before accepting new downloads
+            memory_safe, current_mb = self._check_memory_usage()
+            if not memory_safe:
+                LOGGER(__name__).warning(
+                    f"Memory limit reached: {current_mb}MB / {self.memory_limit_mb}MB - rejecting new download"
+                )
+                return False, (
+                    f"⚠️ **System memory limit reached!**\n\n"
+                    f"📊 **Current Usage:** {current_mb}MB / {self.memory_limit_mb}MB\n"
+                    f"🔄 **Active Downloads:** {len(self.active_downloads)}/{self.max_concurrent}\n\n"
+                    f"Please try again in a few minutes when some downloads complete."
+                )
+            
             if user_id in self.user_queue_positions or user_id in self.active_downloads:
                 position = self.get_queue_position(user_id)
                 if user_id in self.active_downloads:
@@ -151,6 +181,15 @@ class DownloadQueueManager:
                 
                 async with self._lock:
                     while len(self.active_downloads) < self.max_concurrent and self.waiting_queue:
+                        # Circuit breaker: Check memory before promoting queued downloads
+                        memory_safe, current_mb = self._check_memory_usage()
+                        if not memory_safe:
+                            LOGGER(__name__).warning(
+                                f"Memory limit reached during queue processing: {current_mb}MB / {self.memory_limit_mb}MB "
+                                f"- skipping promotion of queued downloads until memory decreases"
+                            )
+                            break  # Stop promoting downloads until memory drops
+                        
                         queue_item = self.waiting_queue.pop(0)
                         user_id = queue_item.user_id
                         
@@ -269,4 +308,26 @@ class DownloadQueueManager:
             LOGGER(__name__).info(f"Cancelled all downloads: {cancelled} total")
             return cancelled
 
-download_queue = DownloadQueueManager(max_concurrent=20, max_queue=100)
+# Detect constrained environments (Render 512MB RAM, Replit)
+IS_RENDER = bool(os.getenv('RENDER') or os.getenv('RENDER_EXTERNAL_URL'))
+IS_REPLIT = bool(os.getenv('REPLIT_DEPLOYMENT') or os.getenv('REPL_ID'))
+IS_CONSTRAINED = IS_RENDER or IS_REPLIT
+
+# Adaptive queue limits based on environment
+# Constrained (Render/Replit): max_concurrent=3, max_queue=25, memory_limit=400MB
+# Unconstrained (VPS/Railway): max_concurrent=20, max_queue=100, memory_limit=900MB
+max_concurrent = 3 if IS_CONSTRAINED else 20
+max_queue = 25 if IS_CONSTRAINED else 100
+memory_limit_mb = 400 if IS_CONSTRAINED else 900
+
+LOGGER(__name__).info(
+    f"Queue limits: max_concurrent={max_concurrent}, max_queue={max_queue}, "
+    f"memory_limit={memory_limit_mb}MB (constrained={IS_CONSTRAINED}, "
+    f"render={IS_RENDER}, replit={IS_REPLIT})"
+)
+
+download_queue = DownloadQueueManager(
+    max_concurrent=max_concurrent, 
+    max_queue=max_queue,
+    memory_limit_mb=memory_limit_mb
+)
