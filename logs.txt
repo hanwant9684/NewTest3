@@ -1,1 +1,17 @@
-[20-Oct-25 03:55:20 PM - INFO] - __init__() - Line 30: cache - Cache initialized: max_size=500, ttl=180s
+[22-Oct-25 02:08:06 PM - INFO] - __init__() - Line 30: cache - Cache initialized: max_size=500, ttl=180s
+[22-Oct-25 02:08:08 PM - INFO] - __init__() - Line 37: database - Successfully connected to MongoDB!
+[22-Oct-25 02:08:10 PM - INFO] - init_database() - Line 69: database - Database indexes created successfully
+[22-Oct-25 02:08:10 PM - INFO] - __init__() - Line 27: ad_monetization - Monetag ad network configured with 0 ad slot(s)
+[22-Oct-25 02:08:10 PM - INFO] - _log() - Line 97: werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.31.82.130:5000
+[22-Oct-25 02:08:10 PM - INFO] - _log() - Line 97: werkzeug - [33mPress CTRL+C to quit[0m
+[22-Oct-25 02:08:11 PM - INFO] - <module>() - Line 343: queue_manager - Queue limits: max_concurrent=2, max_queue=15, memory_limit=380MB (constrained=True, render=False, replit=True)
+[22-Oct-25 02:08:11 PM - INFO] - __init__() - Line 39: queue_manager - Queue Manager initialized: 2 concurrent, 15 max queue, 380MB memory limit
+[22-Oct-25 02:08:11 PM - INFO] - start_processor() - Line 59: queue_manager - Queue processor started
+[22-Oct-25 02:08:11 PM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
+[22-Oct-25 02:08:11 PM - INFO] - start_bot() - Line 119: __main__ - Starting Telegram bot from server.py (long polling)
+[22-Oct-25 02:08:11 PM - INFO] - _init_queue() - Line 1206: main - Download queue processor initialized
+[22-Oct-25 02:08:11 PM - INFO] - _log() - Line 97: werkzeug - 172.31.82.130 - - [22/Oct/2025 14:08:11] "GET / HTTP/1.1" 200 -
+[22-Oct-25 02:08:16 PM - INFO] - start_bot() - Line 121: __main__ - Bot started successfully, waiting for updates...

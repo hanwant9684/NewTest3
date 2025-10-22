@@ -15,6 +15,17 @@ app = Flask(__name__)
 compress = Compress()
 compress.init_app(app)
 
+# Suppress health check logs to reduce log spam from Render health checks
+import logging
+class HealthCheckFilter(logging.Filter):
+    def filter(self, record):
+        # Filter out /health endpoint access logs
+        return '/health' not in record.getMessage()
+
+# Apply filter to werkzeug logger
+werkzeug_logger = logging.getLogger('werkzeug')
+werkzeug_logger.addFilter(HealthCheckFilter())
+
 @app.route('/')
 def index():
     return jsonify({

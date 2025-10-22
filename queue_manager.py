@@ -2,7 +2,7 @@ import os
 import asyncio
 import psutil
 from datetime import datetime
-from typing import Dict, Set, Optional, Tuple
+from typing import Dict, Set, Optional, Tuple, Any
 from dataclasses import dataclass, field
 from enum import IntEnum
 from logger import LOGGER
@@ -16,8 +16,8 @@ class QueueItem:
     priority: int
     timestamp: float = field(compare=True)
     user_id: int = field(compare=False)
-    download_coro: any = field(compare=False)
-    message: any = field(compare=False)
+    download_coro: Any = field(compare=False)
+    message: Any = field(compare=False)
     post_url: str = field(compare=False)
 
 class DownloadQueueManager:
@@ -148,7 +148,7 @@ class DownloadQueueManager:
                 status_msg = f"✅ **Download started!**\n\n🔄 **Active Downloads:** {len(self.active_downloads)}/{self.max_concurrent}"
                 asyncio.create_task(self._send_auto_delete_message(message, status_msg, 10))
                 
-                return True, None
+                return True, ""
     
     async def _send_auto_delete_message(self, message, text: str, delete_after: int):
         """Send a message and auto-delete it after specified seconds"""
@@ -172,7 +172,17 @@ class DownloadQueueManager:
             async with self._lock:
                 self.active_downloads.discard(user_id)
                 self.active_tasks.pop(user_id, None)
-            LOGGER(__name__).info(f"Download completed for user {user_id}. Active: {len(self.active_downloads)}")
+            
+            # Log memory usage after download completes (important for Render's 512MB limit)
+            memory_safe, current_mb = self._check_memory_usage()
+            LOGGER(__name__).info(
+                f"Download completed for user {user_id}. Active: {len(self.active_downloads)}. "
+                f"Memory: {current_mb}MB/{self.memory_limit_mb}MB"
+            )
+            
+            # Force garbage collection after download to free memory
+            import gc
+            gc.collect()
     
     async def _process_queue(self):
         while self._processing:
@@ -314,11 +324,21 @@ IS_REPLIT = bool(os.getenv('REPLIT_DEPLOYMENT') or os.getenv('REPL_ID'))
 IS_CONSTRAINED = IS_RENDER or IS_REPLIT
 
 # Adaptive queue limits based on environment
-# Constrained (Render/Replit): max_concurrent=3, max_queue=25, memory_limit=400MB
+# Render (512MB): max_concurrent=1, max_queue=10, memory_limit=350MB (extra conservative)
+# Replit: max_concurrent=2, max_queue=15, memory_limit=380MB
 # Unconstrained (VPS/Railway): max_concurrent=20, max_queue=100, memory_limit=900MB
-max_concurrent = 3 if IS_CONSTRAINED else 20
-max_queue = 25 if IS_CONSTRAINED else 100
-memory_limit_mb = 400 if IS_CONSTRAINED else 900
+if IS_RENDER:
+    max_concurrent = 1
+    max_queue = 10
+    memory_limit_mb = 350
+elif IS_REPLIT:
+    max_concurrent = 2
+    max_queue = 15
+    memory_limit_mb = 380
+else:
+    max_concurrent = 20
+    max_queue = 100
+    memory_limit_mb = 900
 
 LOGGER(__name__).info(
     f"Queue limits: max_concurrent={max_concurrent}, max_queue={max_queue}, "

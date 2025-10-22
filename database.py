@@ -18,12 +18,15 @@ class DatabaseManager:
             raise ValueError("MongoDB connection string is required. Set MONGODB_URI environment variable.")
         
         try:
-            # Optimized connection settings for Render/Replit
+            # Detect platform for optimal resource allocation
+            IS_RENDER = bool(os.getenv('RENDER') or os.getenv('RENDER_EXTERNAL_URL'))
+            
+            # Optimized connection settings for Render's 512MB RAM / Replit
             self.client = MongoClient(
                 connection_string,
-                maxPoolSize=10,  # Limit connections for 512MB RAM
+                maxPoolSize=5 if IS_RENDER else 10,  # Even smaller pool for Render's 512MB RAM
                 minPoolSize=1,
-                maxIdleTimeMS=45000,  # Close idle connections
+                maxIdleTimeMS=30000 if IS_RENDER else 45000,  # Close idle connections faster on Render
                 serverSelectionTimeoutMS=5000,  # Faster timeout
                 connectTimeoutMS=10000,
                 socketTimeoutMS=10000,

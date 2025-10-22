@@ -4,7 +4,7 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install --no-cache-dir -r requirements.txt
-    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --worker-class gthread --timeout 120 --max-requests 500 --max-requests-jitter 25 --worker-tmp-dir /dev/shm --preload server:app
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 1 --worker-class gthread --timeout 120 --max-requests 500 --max-requests-jitter 25 --worker-tmp-dir /dev/shm server:app
     healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
