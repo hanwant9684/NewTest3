@@ -15,3 +15,5 @@
 [22-Oct-25 02:24:56 PM - INFO] - start_bot() - Line 119: __main__ - Starting Telegram bot from server.py (long polling)
 [22-Oct-25 02:25:03 PM - INFO] - start_bot() - Line 121: __main__ - Bot started successfully, waiting for updates...
 [22-Oct-25 03:03:12 PM - INFO] - _log() - Line 97: werkzeug - 172.31.82.130 - - [22/Oct/2025 15:03:12] "GET / HTTP/1.1" 200 -
+[22-Oct-25 03:04:43 PM - INFO] - _log() - Line 97: werkzeug - 172.31.82.130 - - [22/Oct/2025 15:04:43] "GET / HTTP/1.1" 200 -
+[22-Oct-25 03:05:28 PM - INFO] - _log() - Line 97: werkzeug - 172.31.82.130 - - [22/Oct/2025 15:05:28] "GET / HTTP/1.1" 200 -
