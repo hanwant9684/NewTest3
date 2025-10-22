@@ -21,23 +21,33 @@ class QueueItem:
     post_url: str = field(compare=False)
 
 class DownloadQueueManager:
-    def __init__(self, max_concurrent: int = 20, max_queue: int = 100, memory_limit_mb: int = 400):
-        self.max_concurrent = max_concurrent
+    def __init__(
+        self, 
+        max_concurrent_users: int = 20, 
+        max_concurrent_per_user: int = 1,
+        max_queue: int = 100, 
+        memory_limit_mb: int = 400
+    ):
+        self.max_concurrent_users = max_concurrent_users  # How many users can download simultaneously
+        self.max_concurrent_per_user = max_concurrent_per_user  # Downloads per user
         self.max_queue = max_queue
         self.memory_limit_mb = memory_limit_mb  # Circuit breaker threshold (MB)
         
-        self.active_downloads: Set[int] = set()
+        # Track active downloads per user: {user_id: count}
+        self.active_downloads: Dict[int, int] = {}
         self.waiting_queue: list[QueueItem] = []
         
         self.user_queue_positions: Dict[int, QueueItem] = {}
-        self.active_tasks: Dict[int, asyncio.Task] = {}
+        # Track tasks per user: {user_id: [task1, task2, ...]}
+        self.active_tasks: Dict[int, list[asyncio.Task]] = {}
         
         self._lock = asyncio.Lock()
         self._processing = False
         self._processor_task: Optional[asyncio.Task] = None
         
         LOGGER(__name__).info(
-            f"Queue Manager initialized: {max_concurrent} concurrent, {max_queue} max queue, "
+            f"Queue Manager initialized: {max_concurrent_users} max users, "
+            f"{max_concurrent_per_user} per user, {max_queue} max queue, "
             f"{memory_limit_mb}MB memory limit"
         )
     
@@ -80,38 +90,46 @@ class DownloadQueueManager:
             # Circuit breaker: Check memory usage before accepting new downloads
             memory_safe, current_mb = self._check_memory_usage()
             if not memory_safe:
+                total_active = sum(self.active_downloads.values())
                 LOGGER(__name__).warning(
                     f"Memory limit reached: {current_mb}MB / {self.memory_limit_mb}MB - rejecting new download"
                 )
                 return False, (
                     f"⚠️ **System memory limit reached!**\n\n"
                     f"📊 **Current Usage:** {current_mb}MB / {self.memory_limit_mb}MB\n"
-                    f"🔄 **Active Downloads:** {len(self.active_downloads)}/{self.max_concurrent}\n\n"
+                    f"🔄 **Active Downloads:** {total_active} across {len(self.active_downloads)} users\n\n"
                     f"Please try again in a few minutes when some downloads complete."
                 )
             
-            if user_id in self.user_queue_positions or user_id in self.active_downloads:
-                position = self.get_queue_position(user_id)
-                if user_id in self.active_downloads:
-                    return False, (
-                        "❌ **You already have a download in progress!**\n\n"
-                        "⏳ Please wait for it to complete.\n\n"
-                        "💡 **Want to download this instead?**\n"
-                        "Use `/canceldownload` to cancel the current download."
-                    )
-                else:
-                    return False, (
-                        f"❌ **You already have a download in the queue!**\n\n"
-                        f"📍 **Position:** #{position}/{len(self.waiting_queue)}\n\n"
-                        f"💡 **Want to cancel it?**\n"
-                        f"Use `/canceldownload` to remove from queue."
-                    )
+            # Check if user already has downloads in progress
+            user_active_count = self.active_downloads.get(user_id, 0)
+            if user_active_count >= self.max_concurrent_per_user:
+                return False, (
+                    f"❌ **You already have {user_active_count} download(s) in progress!**\n\n"
+                    f"⏳ Please wait for it to complete.\n\n"
+                    f"💡 **Want to download this instead?**\n"
+                    f"Use `/canceldownload` to cancel the current download."
+                )
             
-            if len(self.active_downloads) >= self.max_concurrent:
+            # Check if user has item in queue
+            if user_id in self.user_queue_positions:
+                position = self.get_queue_position(user_id)
+                return False, (
+                    f"❌ **You already have a download in the queue!**\n\n"
+                    f"📍 **Position:** #{position}/{len(self.waiting_queue)}\n\n"
+                    f"💡 **Want to cancel it?**\n"
+                    f"Use `/canceldownload` to remove from queue."
+                )
+            
+            # Check global concurrent users limit
+            total_users = len(self.active_downloads)
+            if total_users >= self.max_concurrent_users and user_id not in self.active_downloads:
+                # Queue is needed
                 if len(self.waiting_queue) >= self.max_queue:
+                    total_active = sum(self.active_downloads.values())
                     return False, (
                         f"❌ **Download queue is full!**\n\n"
-                        f"🔄 **Active Downloads:** {len(self.active_downloads)}/{self.max_concurrent}\n"
+                        f"🔄 **Active Downloads:** {total_active} across {total_users} users\n"
                         f"⏳ **Waiting in Queue:** {len(self.waiting_queue)}/{self.max_queue}\n\n"
                         f"Please try again later."
                     )
@@ -132,20 +150,29 @@ class DownloadQueueManager:
                 
                 position = self.get_queue_position(user_id)
                 premium_badge = "👑 **PREMIUM**" if is_premium else "🆓 **FREE**"
+                total_active = sum(self.active_downloads.values())
                 
                 return True, (
                     f"⏳ **Download added to queue!**\n\n"
                     f"{premium_badge}\n"
                     f"📍 **Your Position:** #{position}/{len(self.waiting_queue)}\n"
-                    f"🔄 **Active Downloads:** {len(self.active_downloads)}/{self.max_concurrent}\n\n"
+                    f"🔄 **Active Users:** {total_users}/{self.max_concurrent_users} ({total_active} downloads)\n\n"
                     f"💡 You'll be notified when your download starts!"
                 )
             else:
-                self.active_downloads.add(user_id)
-                task = asyncio.create_task(self._execute_download(user_id, download_coro, message))
-                self.active_tasks[user_id] = task
+                # Start download immediately
+                self.active_downloads[user_id] = self.active_downloads.get(user_id, 0) + 1
+                if user_id not in self.active_tasks:
+                    self.active_tasks[user_id] = []
                 
-                status_msg = f"✅ **Download started!**\n\n🔄 **Active Downloads:** {len(self.active_downloads)}/{self.max_concurrent}"
+                task = asyncio.create_task(self._execute_download(user_id, download_coro, message))
+                self.active_tasks[user_id].append(task)
+                
+                total_active = sum(self.active_downloads.values())
+                status_msg = (
+                    f"✅ **Download started!**\n\n"
+                    f"🔄 **Active Users:** {len(self.active_downloads)}/{self.max_concurrent_users} ({total_active} downloads)"
+                )
                 asyncio.create_task(self._send_auto_delete_message(message, status_msg, 10))
                 
                 return True, ""
@@ -170,14 +197,26 @@ class DownloadQueueManager:
                 pass
         finally:
             async with self._lock:
-                self.active_downloads.discard(user_id)
-                self.active_tasks.pop(user_id, None)
+                # Decrement user's active download count
+                if user_id in self.active_downloads:
+                    self.active_downloads[user_id] -= 1
+                    if self.active_downloads[user_id] <= 0:
+                        del self.active_downloads[user_id]
+                
+                # Remove completed task from user's task list
+                if user_id in self.active_tasks:
+                    task = asyncio.current_task()
+                    if task in self.active_tasks[user_id]:
+                        self.active_tasks[user_id].remove(task)
+                    if not self.active_tasks[user_id]:
+                        del self.active_tasks[user_id]
             
             # Log memory usage after download completes (important for Render's 512MB limit)
             memory_safe, current_mb = self._check_memory_usage()
+            total_active = sum(self.active_downloads.values())
             LOGGER(__name__).info(
-                f"Download completed for user {user_id}. Active: {len(self.active_downloads)}. "
-                f"Memory: {current_mb}MB/{self.memory_limit_mb}MB"
+                f"Download completed for user {user_id}. Active: {total_active} downloads "
+                f"across {len(self.active_downloads)} users. Memory: {current_mb}MB/{self.memory_limit_mb}MB"
             )
             
             # Force garbage collection after download to free memory
@@ -190,7 +229,8 @@ class DownloadQueueManager:
                 await asyncio.sleep(1)
                 
                 async with self._lock:
-                    while len(self.active_downloads) < self.max_concurrent and self.waiting_queue:
+                    # Process queue while we have capacity for more users
+                    while len(self.active_downloads) < self.max_concurrent_users and self.waiting_queue:
                         # Circuit breaker: Check memory before promoting queued downloads
                         memory_safe, current_mb = self._check_memory_usage()
                         if not memory_safe:
@@ -205,10 +245,15 @@ class DownloadQueueManager:
                         
                         self.user_queue_positions.pop(user_id, None)
                         
+                        # Skip if user already has active downloads (shouldn't happen but safety check)
                         if user_id in self.active_downloads:
+                            LOGGER(__name__).warning(f"User {user_id} already active, skipping queue promotion")
                             continue
                         
-                        self.active_downloads.add(user_id)
+                        # Start download for this user
+                        self.active_downloads[user_id] = 1
+                        if user_id not in self.active_tasks:
+                            self.active_tasks[user_id] = []
                         
                         try:
                             status_msg = f"🚀 **Your download is starting now!**\n\n📥 Downloading: `{queue_item.post_url}`"
@@ -219,11 +264,13 @@ class DownloadQueueManager:
                         task = asyncio.create_task(
                             self._execute_download(user_id, queue_item.download_coro, queue_item.message)
                         )
-                        self.active_tasks[user_id] = task
+                        self.active_tasks[user_id].append(task)
                         
+                        total_active = sum(self.active_downloads.values())
                         LOGGER(__name__).info(
                             f"Started queued download for user {user_id}. "
-                            f"Active: {len(self.active_downloads)}, Queue: {len(self.waiting_queue)}"
+                            f"Active: {total_active} downloads across {len(self.active_downloads)} users, "
+                            f"Queue: {len(self.waiting_queue)}"
                         )
             
             except asyncio.CancelledError:
@@ -239,10 +286,13 @@ class DownloadQueueManager:
     
     async def get_queue_status(self, user_id: int) -> str:
         async with self._lock:
-            if user_id in self.active_downloads:
+            user_active_count = self.active_downloads.get(user_id, 0)
+            total_active = sum(self.active_downloads.values())
+            
+            if user_active_count > 0:
                 return (
-                    f"📥 **Your download is currently active!**\n\n"
-                    f"🔄 **Active Downloads:** {len(self.active_downloads)}/{self.max_concurrent}\n"
+                    f"📥 **You have {user_active_count} download(s) active!**\n\n"
+                    f"🔄 **Total Active:** {total_active} downloads across {len(self.active_downloads)} users\n"
                     f"⏳ **Waiting in Queue:** {len(self.waiting_queue)}/{self.max_queue}"
                 )
             
@@ -255,26 +305,28 @@ class DownloadQueueManager:
                     f"⏳ **You're in the queue!**\n\n"
                     f"{priority_text}\n"
                     f"📍 **Your Position:** #{position}/{len(self.waiting_queue)}\n"
-                    f"🔄 **Active Downloads:** {len(self.active_downloads)}/{self.max_concurrent}\n\n"
+                    f"🔄 **Active Users:** {len(self.active_downloads)}/{self.max_concurrent_users} ({total_active} downloads)\n\n"
                     f"💡 Estimated wait: ~{position * 2} minutes"
                 )
             
             return (
                 f"✅ **No active downloads**\n\n"
-                f"🔄 **Active Downloads:** {len(self.active_downloads)}/{self.max_concurrent}\n"
+                f"🔄 **Active Users:** {len(self.active_downloads)}/{self.max_concurrent_users} ({total_active} downloads)\n"
                 f"⏳ **Waiting in Queue:** {len(self.waiting_queue)}/{self.max_queue}\n\n"
                 f"💡 Send a download link to get started!"
             )
     
     async def get_global_status(self) -> str:
         async with self._lock:
+            total_active = sum(self.active_downloads.values())
             premium_in_queue = sum(1 for item in self.waiting_queue if item.priority == Priority.PREMIUM)
             free_in_queue = len(self.waiting_queue) - premium_in_queue
             
             return (
                 f"📊 **Queue System Status**\n"
                 f"━━━━━━━━━━━━━━━━━━━\n"
-                f"🔄 **Active Downloads:** {len(self.active_downloads)}/{self.max_concurrent}\n"
+                f"👥 **Active Users:** {len(self.active_downloads)}/{self.max_concurrent_users}\n"
+                f"🔄 **Total Downloads:** {total_active}\n"
                 f"⏳ **Waiting in Queue:** {len(self.waiting_queue)}/{self.max_queue}\n\n"
                 f"👑 Premium in queue: {premium_in_queue}\n"
                 f"🆓 Free in queue: {free_in_queue}\n\n"
@@ -283,13 +335,19 @@ class DownloadQueueManager:
     
     async def cancel_user_download(self, user_id: int) -> Tuple[bool, str]:
         async with self._lock:
-            if user_id in self.active_downloads:
-                task = self.active_tasks.get(user_id)
-                if task and not task.done():
-                    task.cancel()
-                self.active_downloads.discard(user_id)
+            user_active_count = self.active_downloads.get(user_id, 0)
+            if user_active_count > 0:
+                # Cancel all active downloads for this user
+                tasks = self.active_tasks.get(user_id, [])
+                for task in tasks:
+                    if not task.done():
+                        task.cancel()
+                
+                del self.active_downloads[user_id]
                 self.active_tasks.pop(user_id, None)
-                return True, "✅ **Active download cancelled!**"
+                
+                plural = "downloads" if user_active_count > 1 else "download"
+                return True, f"✅ **{user_active_count} active {plural} cancelled!**"
             
             queue_item = self.user_queue_positions.get(user_id)
             if queue_item and queue_item in self.waiting_queue:
@@ -303,10 +361,12 @@ class DownloadQueueManager:
         async with self._lock:
             cancelled = 0
             
-            for task in self.active_tasks.values():
-                if not task.done():
-                    task.cancel()
-                    cancelled += 1
+            # Cancel all active tasks
+            for user_tasks in self.active_tasks.values():
+                for task in user_tasks:
+                    if not task.done():
+                        task.cancel()
+                        cancelled += 1
             
             self.active_downloads.clear()
             self.active_tasks.clear()
@@ -323,31 +383,37 @@ IS_RENDER = bool(os.getenv('RENDER') or os.getenv('RENDER_EXTERNAL_URL'))
 IS_REPLIT = bool(os.getenv('REPLIT_DEPLOYMENT') or os.getenv('REPL_ID'))
 IS_CONSTRAINED = IS_RENDER or IS_REPLIT
 
-# Adaptive queue limits based on environment
-# Render (512MB): max_concurrent=1, max_queue=10, memory_limit=350MB (extra conservative)
-# Replit: max_concurrent=2, max_queue=15, memory_limit=380MB
-# Unconstrained (VPS/Railway): max_concurrent=20, max_queue=100, memory_limit=900MB
+# Adaptive queue limits based on environment - PER-USER CONCURRENCY MODEL
+# Each user limited to 1 concurrent download, but multiple users can download simultaneously
+# Render (512MB): 3 max users, 10 queue, 350MB memory (conservative for 512MB RAM)
+# Replit: 5 max users, 15 queue, 380MB memory
+# Unconstrained (VPS/Railway): 20 max users, 100 queue, 900MB memory
 if IS_RENDER:
-    max_concurrent = 1
+    max_concurrent_users = 3  # Max 3 users downloading simultaneously
+    max_concurrent_per_user = 1  # Each user can download 1 file at a time
     max_queue = 10
     memory_limit_mb = 350
 elif IS_REPLIT:
-    max_concurrent = 2
+    max_concurrent_users = 5  # Max 5 users downloading simultaneously
+    max_concurrent_per_user = 1  # Each user can download 1 file at a time
     max_queue = 15
     memory_limit_mb = 380
 else:
-    max_concurrent = 20
+    max_concurrent_users = 20  # Max 20 users downloading simultaneously
+    max_concurrent_per_user = 1  # Each user can download 1 file at a time
     max_queue = 100
     memory_limit_mb = 900
 
 LOGGER(__name__).info(
-    f"Queue limits: max_concurrent={max_concurrent}, max_queue={max_queue}, "
+    f"Queue limits: max_concurrent_users={max_concurrent_users}, "
+    f"max_concurrent_per_user={max_concurrent_per_user}, max_queue={max_queue}, "
     f"memory_limit={memory_limit_mb}MB (constrained={IS_CONSTRAINED}, "
     f"render={IS_RENDER}, replit={IS_REPLIT})"
 )
 
 download_queue = DownloadQueueManager(
-    max_concurrent=max_concurrent, 
+    max_concurrent_users=max_concurrent_users,
+    max_concurrent_per_user=max_concurrent_per_user,
     max_queue=max_queue,
     memory_limit_mb=memory_limit_mb
 )

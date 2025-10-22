@@ -13,7 +13,11 @@ The bot interacts with users primarily via Telegram commands. Ad verification us
 
 ### Technical Implementations
 - **Language**: Python 3.11 with `uvloop` for asynchronous operations and `TgCrypto` for cryptographic tasks.
-- **Concurrency & Resource Management**: Adaptive resource allocation based on deployment platform (e.g., Render, Replit), adjusting workers and concurrent transmissions. Includes a memory circuit breaker to prevent OOM errors by monitoring process memory and rejecting new downloads if limits are approached.
+- **Concurrency & Resource Management**: Per-user concurrency model allowing multiple users to download simultaneously. Adaptive resource allocation based on deployment platform:
+  - **Render (512MB)**: Max 3 concurrent users, 1 download per user, 350MB memory limit
+  - **Replit**: Max 5 concurrent users, 1 download per user, 380MB memory limit
+  - **VPS/Railway**: Max 20 concurrent users, 1 download per user, 900MB memory limit
+  - Memory circuit breaker prevents OOM errors by monitoring process memory and rejecting new downloads if limits are approached.
 - **Caching**: An LRU cache (500 items, 180s TTL) reduces redundant database queries for frequently accessed data like admin status, ban status, user types, and sessions.
 - **Database Optimization**: MongoDB connection pooling with optimized server selection and idle timeouts. No local SQLite or file-based databases are used.
 - **Deployment**: Designed for VM deployment, with auto-detection for platforms like Railway.app, Render, Heroku, and Replit, using a Flask wrapper for web server deployment.
