@@ -1,3 +1,4 @@
+import os
 import asyncio
 from datetime import datetime
 from typing import Dict, Set, Optional, Tuple
@@ -269,4 +270,18 @@ class DownloadQueueManager:
             LOGGER(__name__).info(f"Cancelled all downloads: {cancelled} total")
             return cancelled
 
-download_queue = DownloadQueueManager(max_concurrent=20, max_queue=100)
+# Detect constrained environments (Render, Replit) and reduce queue size
+IS_CONSTRAINED = bool(
+    os.getenv('RENDER') or 
+    os.getenv('RENDER_EXTERNAL_URL') or 
+    os.getenv('REPLIT_DEPLOYMENT') or 
+    os.getenv('REPL_ID')
+)
+
+# Use optimized queue for constrained environments (512MB RAM limit)
+# Render free tier: 10 concurrent downloads (good for 2-3 active users), 50 max queue
+# Normal deployment: 20 concurrent downloads, 100 max queue
+MAX_CONCURRENT = 10 if IS_CONSTRAINED else 20
+MAX_QUEUE = 50 if IS_CONSTRAINED else 100
+
+download_queue = DownloadQueueManager(max_concurrent=MAX_CONCURRENT, max_queue=MAX_QUEUE)

@@ -2,6 +2,8 @@
 # Copyright (C) @Wolfy004
 
 import os
+import time
+import asyncio
 from pyrogram import Client
 from pyrogram.errors import SessionPasswordNeeded, PhoneCodeInvalid, PhoneCodeExpired, PasswordHashInvalid, FloodWait
 from logger import LOGGER
@@ -13,6 +15,7 @@ class PhoneAuthHandler:
         self.api_id = api_id
         self.api_hash = api_hash
         self.pending_auth = {}
+        self._cleanup_task = None
 
     async def send_otp(self, user_id: int, phone_number: str):
         """
@@ -44,7 +47,8 @@ class PhoneAuthHandler:
                 'phone_number': phone_number,
                 'phone_code_hash': phone_code_hash,
                 'client': client,
-                'session_name': session_name
+                'session_name': session_name,
+                'created_at': time.time()  # Track creation time for cleanup
             }
 
             LOGGER(__name__).info(f"OTP sent to {phone_number} for user {user_id}")
@@ -179,3 +183,44 @@ class PhoneAuthHandler:
     def has_pending_auth(self, user_id: int) -> bool:
         """Check if user has pending authentication"""
         return user_id in self.pending_auth
+    
+    def start_cleanup_task(self):
+        """Start the cleanup task (call this after event loop is running)"""
+        if not self._cleanup_task:
+            self._cleanup_task = asyncio.create_task(self._cleanup_stale_sessions())
+            LOGGER(__name__).info("Started auth session cleanup task")
+    
+    async def _cleanup_stale_sessions(self):
+        """
+        Background task to cleanup stale auth sessions (memory leak prevention)
+        OTP codes expire after ~10 minutes, so we cleanup sessions older than 15 minutes
+        This prevents memory leaks from users who start login but never finish
+        Each pending session holds a Pyrogram Client (~100MB), so this is critical for Render
+        """
+        while True:
+            try:
+                await asyncio.sleep(300)  # Check every 5 minutes
+                
+                current_time = time.time()
+                stale_timeout = 900  # 15 minutes in seconds
+                
+                stale_users = []
+                for user_id, auth_data in self.pending_auth.items():
+                    if current_time - auth_data.get('created_at', 0) > stale_timeout:
+                        stale_users.append(user_id)
+                
+                # Cleanup stale sessions
+                for user_id in stale_users:
+                    try:
+                        LOGGER(__name__).info(f"Cleaning up stale auth session for user {user_id}")
+                        await self.pending_auth[user_id]['client'].disconnect()
+                        del self.pending_auth[user_id]
+                    except Exception as e:
+                        LOGGER(__name__).error(f"Error cleaning up session for user {user_id}: {e}")
+                
+                if stale_users:
+                    LOGGER(__name__).info(f"Cleaned up {len(stale_users)} stale auth session(s)")
+                    
+            except Exception as e:
+                LOGGER(__name__).error(f"Error in auth session cleanup task: {e}")
+                await asyncio.sleep(60)  # Wait 1 minute before retry on error

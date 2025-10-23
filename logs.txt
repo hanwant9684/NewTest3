@@ -1,4 +1,21 @@
-[23-Oct-25 03:12:37 AM - INFO] - __init__() - Line 30: cache - Cache initialized: max_size=500, ttl=180s
-[23-Oct-25 03:12:39 AM - INFO] - __init__() - Line 34: database - Successfully connected to MongoDB!
-[23-Oct-25 03:12:41 AM - INFO] - init_database() - Line 66: database - Database indexes created successfully
-[23-Oct-25 03:12:41 AM - INFO] - __init__() - Line 27: ad_monetization - Monetag ad network configured with 0 ad slot(s)
+[23-Oct-25 11:58:54 AM - INFO] - __init__() - Line 31: cache - Cache initialized: max_size=200, ttl=180s
+[23-Oct-25 11:58:56 AM - INFO] - __init__() - Line 45: database - Successfully connected to MongoDB!
+[23-Oct-25 11:58:58 AM - INFO] - init_database() - Line 77: database - Database indexes created successfully
+[23-Oct-25 11:58:58 AM - INFO] - __init__() - Line 27: ad_monetization - Monetag ad network configured with 0 ad slot(s)
+[23-Oct-25 11:58:58 AM - INFO] - _log() - Line 97: werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.31.110.66:5000
+[23-Oct-25 11:58:58 AM - INFO] - _log() - Line 97: werkzeug - [33mPress CTRL+C to quit[0m
+[23-Oct-25 11:58:59 AM - INFO] - __init__() - Line 37: queue_manager - Queue Manager initialized: 10 concurrent, 50 max queue
+[23-Oct-25 11:58:59 AM - INFO] - start_processor() - Line 43: queue_manager - Queue processor started
+[23-Oct-25 11:58:59 AM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
+[23-Oct-25 11:58:59 AM - INFO] - _init_queue() - Line 1335: main - Download queue processor initialized
+[23-Oct-25 11:58:59 AM - INFO] - start_bot() - Line 108: __main__ - Starting Telegram bot from server.py (long polling)
+[23-Oct-25 11:59:04 AM - INFO] - start_bot() - Line 110: __main__ - Bot started successfully, waiting for updates...
+[23-Oct-25 11:59:04 AM - INFO] - start_cleanup_task() - Line 191: phone_auth - Started auth session cleanup task
+[23-Oct-25 11:59:04 AM - INFO] - start_bot() - Line 118: __main__ - Started periodic download cleanup task
+[23-Oct-25 11:59:05 AM - INFO] - verify_dump_channel() - Line 1360: main - ✅ Dump channel verified: Dump (ID: -1003042213082)
+[23-Oct-25 11:59:05 AM - INFO] - verify_dump_channel() - Line 1361: main - All downloaded media will be forwarded to dump channel
+[23-Oct-25 11:59:53 AM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
+[23-Oct-25 11:59:58 AM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004

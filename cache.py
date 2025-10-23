@@ -6,6 +6,7 @@ In-memory cache to reduce database queries and improve response time
 Especially important on Render's 512MB RAM limit
 """
 
+import os
 import time
 from typing import Optional, Dict, Any
 from collections import OrderedDict
@@ -99,7 +100,17 @@ class LRUCache:
 
 # Global cache instance
 # Using smaller cache for Render's 512MB RAM
-_cache = LRUCache(max_size=500, default_ttl=180)  # 3 minutes TTL
+# Detect constrained environments (Render, Replit) and reduce cache size
+IS_CONSTRAINED = bool(
+    os.getenv('RENDER') or 
+    os.getenv('RENDER_EXTERNAL_URL') or 
+    os.getenv('REPLIT_DEPLOYMENT') or 
+    os.getenv('REPL_ID')
+)
+
+# Use smaller cache for constrained environments to save memory
+CACHE_SIZE = 200 if IS_CONSTRAINED else 500
+_cache = LRUCache(max_size=CACHE_SIZE, default_ttl=180)  # 3 minutes TTL
 
 
 def get_cache() -> LRUCache:

@@ -109,6 +109,14 @@ def run_bot():
             await main.bot.start()
             main.LOGGER(__name__).info("Bot started successfully, waiting for updates...")
             
+            # Start auth session cleanup task (prevents memory leaks)
+            main.phone_auth_handler.start_cleanup_task()
+            
+            # Start periodic download cleanup task (frees disk space)
+            from helpers.cleanup import start_periodic_cleanup
+            asyncio.create_task(start_periodic_cleanup(interval_minutes=30))
+            main.LOGGER(__name__).info("Started periodic download cleanup task")
+            
             # Verify dump channel after bot starts
             await main.verify_dump_channel()
             

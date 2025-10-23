@@ -4,7 +4,7 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install --no-cache-dir -r requirements.txt
-    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --worker-class gthread --timeout 120 --max-requests 500 --max-requests-jitter 25 --worker-tmp-dir /dev/shm --preload server:app
+    startCommand: waitress-serve --host=0.0.0.0 --port=$PORT --threads=4 --channel-timeout=120 --asyncore-use-poll=true server:app
     healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
@@ -13,3 +13,7 @@ services:
         value: "true"
       - key: WEB_CONCURRENCY
         value: "1"
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: MALLOC_TRIM_THRESHOLD_
+        value: "100000"

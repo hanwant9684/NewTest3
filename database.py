@@ -19,11 +19,22 @@ class DatabaseManager:
         
         try:
             # Optimized connection settings for Render/Replit
+            # Detect constrained environments
+            IS_CONSTRAINED = bool(
+                os.getenv('RENDER') or 
+                os.getenv('RENDER_EXTERNAL_URL') or 
+                os.getenv('REPLIT_DEPLOYMENT') or 
+                os.getenv('REPL_ID')
+            )
+            
+            # Reduce pool size for Render (saves ~30-40MB)
+            pool_size = 3 if IS_CONSTRAINED else 10
+            
             self.client = MongoClient(
                 connection_string,
-                maxPoolSize=10,  # Limit connections for 512MB RAM
+                maxPoolSize=pool_size,  # 3 for Render, 10 for VPS
                 minPoolSize=1,
-                maxIdleTimeMS=45000,  # Close idle connections
+                maxIdleTimeMS=30000,  # Close idle connections faster (30s vs 45s)
                 serverSelectionTimeoutMS=5000,  # Faster timeout
                 connectTimeoutMS=10000,
                 socketTimeoutMS=10000,
