@@ -100,6 +100,20 @@ phone_auth_handler = PhoneAuthHandler(PyroConf.API_ID, PyroConf.API_HASH)
 RUNNING_TASKS = set()
 USER_TASKS = {}
 
+# Custom filter to ignore old pending updates (prevents duplicate messages after bot restart)
+def is_new_update(_, __, message: Message):
+    """Filter to ignore messages older than bot start time"""
+    if not hasattr(bot, 'start_time'):
+        return True  # If start_time not set yet, allow all messages
+    
+    # Check if message date is newer than bot start time
+    if message.date:
+        return message.date.timestamp() >= bot.start_time
+    return True  # Allow messages without date
+
+# Create the filter
+new_updates_only = filters.create(is_new_update)
+
 def track_task(coro, user_id=None):
     task = asyncio.create_task(coro)
     RUNNING_TASKS.add(task)
@@ -138,7 +152,7 @@ async def auto_add_owner_as_admin(_, message: Message):
         db.add_admin(PyroConf.OWNER_ID, PyroConf.OWNER_ID)
         LOGGER(__name__).info(f"Auto-added owner {PyroConf.OWNER_ID} as admin")
 
-@bot.on_message(filters.command("start") & filters.private)
+@bot.on_message(filters.command("start") & filters.private & new_updates_only)
 @register_user
 async def start(_, message: Message):
     welcome_text = (
@@ -351,10 +365,68 @@ async def handle_download(bot: Client, message: Message, post_url: str, user_cli
         )
 
         if chat_message.media_group_id:
-            if not await processMediaGroup(chat_message, bot, message, message.from_user.id):
-                await message.reply(
-                    "**Could not extract any valid media from the media group.**"
-                )
+            # Count files in media group first for quota check
+            media_group_messages = await chat_message.get_media_group()
+            file_count = sum(1 for msg in media_group_messages if msg.photo or msg.video or msg.document or msg.audio)
+            
+            LOGGER(__name__).info(f"Media group detected with {file_count} files for user {message.from_user.id}")
+            
+            # Pre-flight quota check before downloading
+            if increment_usage:
+                can_dl, quota_msg = db.can_download(message.from_user.id, file_count)
+                if not can_dl:
+                    from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+                    keyboard = InlineKeyboardMarkup([
+                        [InlineKeyboardButton("🎁 Watch Ad & Get 1 Download", callback_data="watch_ad_now")],
+                        [InlineKeyboardButton("💰 Upgrade to Premium", callback_data="upgrade_premium")]
+                    ])
+                    await message.reply(quota_msg, reply_markup=keyboard)
+                    return
+            
+            # Download media group
+            files_sent = await processMediaGroup(chat_message, bot, message, message.from_user.id)
+            
+            if files_sent == 0:
+                await message.reply("**Could not extract any valid media from the media group.**")
+                return
+            
+            # Increment usage by actual file count after successful download
+            if increment_usage:
+                success = db.increment_usage(message.from_user.id, files_sent)
+                if not success:
+                    LOGGER(__name__).error(f"Failed to increment usage for user {message.from_user.id} after media group download")
+                
+                # Show upgrade message for free users
+                user_type = db.get_user_type(message.from_user.id)
+                if user_type == 'free':
+                    user_data = db.get_user(message.from_user.id)
+                    ad_downloads = user_data.get('ad_downloads', 0) if user_data else 0
+                    
+                    # Only show upgrade prompt if they don't have ad downloads remaining
+                    if ad_downloads == 0:
+                        from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+                        upgrade_keyboard = InlineKeyboardMarkup([
+                            [InlineKeyboardButton("🎁 Get FREE Downloads", callback_data="watch_ad_now")],
+                            [InlineKeyboardButton("💰 Upgrade to Premium - $1/month", callback_data="upgrade_premium")]
+                        ])
+                        
+                        daily_usage = db.get_daily_usage(message.from_user.id)
+                        sent_msg = await message.reply(
+                            f"✅ **{files_sent} files downloaded!**\n\n"
+                            f"📊 **Daily downloads used:** {daily_usage}/1\n\n"
+                            "💎 **Want unlimited downloads?**",
+                            reply_markup=upgrade_keyboard
+                        )
+                        
+                        async def delete_after_delay():
+                            try:
+                                await asyncio.sleep(15)
+                                await sent_msg.delete()
+                            except Exception as e:
+                                LOGGER(__name__).debug(f"Could not delete upgrade message: {e}")
+                        
+                        asyncio.create_task(delete_after_delay())
+            
             return
 
         elif chat_message.media:
@@ -736,7 +808,7 @@ async def global_queue_status_command(client: Client, message: Message):
     status = await download_queue.get_global_status()
     await message.reply(status)
 
-@bot.on_message(filters.private & ~filters.command(["start", "help", "dl", "stats", "logs", "killall", "bdl", "myinfo", "upgrade", "premiumlist", "getpremium", "verifypremium", "login", "verify", "password", "logout", "cancel", "canceldownload", "queue", "qstatus", "setthumb", "delthumb", "viewthumb", "addadmin", "removeadmin", "setpremium", "removepremium", "ban", "unban", "broadcast", "adminstats", "userinfo", "testdump"]))
+@bot.on_message(filters.private & new_updates_only & ~filters.command(["start", "help", "dl", "stats", "logs", "killall", "bdl", "myinfo", "upgrade", "premiumlist", "getpremium", "verifypremium", "login", "verify", "password", "logout", "cancel", "canceldownload", "queue", "qstatus", "setthumb", "delthumb", "viewthumb", "addadmin", "removeadmin", "setpremium", "removepremium", "ban", "unban", "broadcast", "adminstats", "userinfo", "testdump"]))
 @force_subscribe
 @check_download_limit
 async def handle_any_message(bot: Client, message: Message):

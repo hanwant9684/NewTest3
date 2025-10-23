@@ -121,3 +121,34 @@ Implemented a new "1 download per ad" system to increase ad engagement and reven
 - Simplified tracking and accounting
 
 **Status:** ✅ Implemented and tested, architect-reviewed and approved
+
+### Fix for Duplicate Messages After Bot Restart (October 23, 2025)
+Fixed an issue where users received duplicate/multiple responses when deploying on Render and restarting the bot:
+
+**Problem:**
+- When the bot restarted on Render, Telegram would queue all pending updates (e.g., `/start` commands sent while bot was offline)
+- Upon restart, the bot would process all queued updates, resulting in users seeing the same message multiple times
+- This was particularly problematic after deployments when users tried to interact with the bot
+
+**Solution Implemented:**
+- Added a custom filter `new_updates_only` that checks message timestamps against the bot's start time
+- Messages older than the bot's start time are automatically ignored
+- The bot now records its start time when launched and filters out any messages received before that time
+
+**Technical Details:**
+- Created `is_new_update()` filter function in `main.py` that compares `message.date.timestamp()` with `bot.start_time`
+- Applied `new_updates_only` filter to main message handlers (start command and message handler)
+- Set `bot.start_time = time.time()` in `server.py` immediately after bot startup
+- This prevents processing of old pending updates that accumulated while bot was offline
+
+**Files Modified:**
+- `main.py` - Added `is_new_update()` filter and `new_updates_only` filter, applied to message handlers
+- `server.py` - Set `bot.start_time` after bot startup
+
+**Benefits:**
+- Users no longer receive duplicate messages after bot restarts
+- Cleaner user experience during deployments
+- Prevents confusion from multiple identical responses
+- More professional bot behavior
+
+**Status:** ✅ Implemented and tested on Replit, ready for Render deployment

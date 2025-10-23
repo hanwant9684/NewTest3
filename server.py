@@ -107,6 +107,11 @@ def run_bot():
         try:
             main.LOGGER(__name__).info("Starting Telegram bot from server.py (long polling)")
             await main.bot.start()
+            
+            # Set bot start time to ignore old pending updates
+            import time
+            main.bot.start_time = time.time()
+            
             main.LOGGER(__name__).info("Bot started successfully, waiting for updates...")
             
             # Start auth session cleanup task (prevents memory leaks)

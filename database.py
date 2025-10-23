@@ -307,7 +307,15 @@ class DatabaseManager:
             return 0
 
     def increment_usage(self, user_id: int, count: int = 1) -> bool:
-        """Increment usage count - uses ad downloads first, then daily usage (with limit validation)"""
+        """Increment usage count - uses ad downloads first, then daily usage (with limit validation)
+        
+        Args:
+            user_id: User ID
+            count: Number of files to increment (default 1)
+            
+        Returns:
+            bool: True if increment successful, False if quota insufficient
+        """
         try:
             user_type = self.get_user_type(user_id)
             
@@ -320,25 +328,25 @@ class DatabaseManager:
             ad_downloads = user.get('ad_downloads', 0) if user else 0
             
             if ad_downloads > 0:
-                # Ad downloads bypass daily limits completely
-                # Calculate how many to use from ad downloads
-                ad_to_use = min(count, ad_downloads)
+                # PRE-VALIDATE: Check if user has enough ad downloads BEFORE deducting
+                if count > ad_downloads:
+                    LOGGER(__name__).warning(f"User {user_id} has only {ad_downloads} ad downloads but needs {count}")
+                    return False
                 
-                # Use ad downloads (only deduct what's available)
+                # Ad downloads bypass daily limits completely
+                # Deduct the exact count (we already validated it's available)
                 result = self.users.update_one(
-                    {"user_id": user_id, "ad_downloads": {"$gte": ad_to_use}},
-                    {"$inc": {"ad_downloads": -ad_to_use}}
+                    {"user_id": user_id, "ad_downloads": {"$gte": count}},
+                    {"$inc": {"ad_downloads": -count}}
                 )
                 
                 if result.modified_count > 0:
-                    LOGGER(__name__).info(f"User {user_id} used {ad_to_use} ad download(s), {ad_downloads - ad_to_use} remaining")
-                    
-                    # If count exceeds ad_downloads, user needs to watch more ads or upgrade
-                    # Don't fall back to daily quota - ad downloads are independent
-                    if count > ad_to_use:
-                        LOGGER(__name__).warning(f"User {user_id} needs {count - ad_to_use} more downloads after using all ad downloads")
-                        return False
+                    LOGGER(__name__).info(f"User {user_id} used {count} ad download(s), {ad_downloads - count} remaining")
                     return True
+                else:
+                    # Race condition: another process might have used the ad downloads
+                    LOGGER(__name__).error(f"Failed to deduct {count} ad downloads for user {user_id} (race condition)")
+                    return False
             
             # No ad downloads, use daily usage (validate limit)
             daily_usage = self.get_daily_usage(user_id)
@@ -357,8 +365,16 @@ class DatabaseManager:
             LOGGER(__name__).error(f"Error incrementing usage for {user_id}: {e}")
             return False
 
-    def can_download(self, user_id: int) -> tuple[bool, str]:
-        """Check if user can download (considering ad downloads and daily limits)"""
+    def can_download(self, user_id: int, count: int = 1) -> tuple[bool, str]:
+        """Check if user can download (considering ad downloads and daily limits)
+        
+        Args:
+            user_id: User ID
+            count: Number of files to download (default 1, for media groups can be > 1)
+            
+        Returns:
+            tuple: (can_download: bool, message: str)
+        """
         user_type = self.get_user_type(user_id)
 
         if user_type in ['admin', 'paid']:
@@ -369,10 +385,22 @@ class DatabaseManager:
         ad_downloads = user.get('ad_downloads', 0) if user else 0
         
         if ad_downloads > 0:
+            if ad_downloads < count:
+                # Not enough ad downloads for this media group
+                quota_message = (
+                    f"❌ **Insufficient ad downloads**\n\n"
+                    f"📊 **You have:** {ad_downloads} ad download(s)\n"
+                    f"📊 **You need:** {count} download(s) for this media group\n\n"
+                    "💎 **Get More Downloads:**\n\n"
+                    "🎁 **Watch more ads:** Use `/getpremium` to get 1 more download!\n"
+                    "💰 **Upgrade to Premium:** Use `/upgrade` - $1/month for unlimited downloads!"
+                )
+                return False, quota_message
+            
             remaining_ad_downloads = ad_downloads
             success_message = (
                 f"✅ **Download successful!**\n\n"
-                f"📥 **Ad downloads remaining:** {remaining_ad_downloads}\n\n"
+                f"📥 **Ad downloads remaining:** {remaining_ad_downloads - count}\n\n"
                 "💎 **Want more free downloads?**\n"
                 "🎁 Use `/getpremium` - Watch ads and get 1 more download!\n"
                 "💰 Or upgrade to Premium: `/upgrade` - Unlimited downloads!"
@@ -380,10 +408,11 @@ class DatabaseManager:
             return True, success_message
 
         daily_usage = self.get_daily_usage(user_id)
-        if daily_usage >= 1:
+        if daily_usage + count > 1:
             from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
             quota_message = (
-                "📊 **Daily limit reached (1 file)**\n\n"
+                f"📊 **Daily limit reached ({daily_usage}/1 files used)**\n\n"
+                f"❌ **Cannot download:** This {'media group has ' + str(count) + ' files' if count > 1 else 'file'} would exceed your daily limit\n\n"
                 "💎 **Get More Downloads:**\n\n"
                 "🎁 **FREE Option - Watch Ads:**\n"
                 "   • Click button below or use `/getpremium` command\n"
@@ -402,7 +431,7 @@ class DatabaseManager:
 
         completed_message = (
             f"✅ **Download complete!**\n\n"
-            f"📥 **Downloads completed today:** {daily_usage + 1}/1\n\n"
+            f"📥 **Downloads completed today:** {daily_usage + count}/1\n\n"
             "💎 **Want unlimited downloads?**\n\n"
             "🎁 **Get FREE Downloads:** Use `/getpremium` - Watch ads for 1 more download!\n"
             "💰 **Or Pay $1/month:** Use `/upgrade` - Unlimited downloads forever!\n\n"
