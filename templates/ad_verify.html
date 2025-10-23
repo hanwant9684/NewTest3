@@ -596,15 +596,15 @@
             <div class="code-display">
                 <h2>🎉 Verification Complete!</h2>
                 <div class="code" id="codeValue">LOADING...</div>
-                <p>Copy this code to get your 5 free downloads!</p>
+                <p>Copy this code to get your 1 free download!</p>
             </div>
             <div class="instructions">
                 <h3>📝 How to use your code:</h3>
                 <ol>
-                    <li>📋 Copy the verification code above</li>
+                    <li>📋 Copy the command above</li>
                     <li>💬 Go back to the Telegram bot</li>
-                    <li>⌨️ Send this command: <code>/verifypremium YOUR_CODE</code></li>
-                    <li>🎊 Enjoy your 5 free downloads!</li>
+                    <li>⌨️ Send (paste) the command</li>
+                    <li>🎊 Enjoy your 1 free download!</li>
                 </ol>
             </div>
             <button class="copy-btn" onclick="copyCode()">📋 COPY CODE</button>
@@ -797,7 +797,7 @@
         function showCode(code) {
             document.getElementById('loadingPage').classList.remove('active');
             document.getElementById('codePage').classList.add('active');
-            document.getElementById('codeValue').textContent = code;
+            document.getElementById('codeValue').textContent = `/verifypremium ${code}`;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -811,7 +811,8 @@
         function copyCode() {
             if (!verificationCode) return;
             
-            navigator.clipboard.writeText(verificationCode).then(() => {
+            const commandWithCode = `/verifypremium ${verificationCode}`;
+            navigator.clipboard.writeText(commandWithCode).then(() => {
                 const btn = event.target;
                 const originalText = btn.textContent;
                 btn.textContent = '✅ COPIED!';
@@ -822,7 +823,7 @@
                     btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
                 }, 2000);
             }).catch(err => {
-                alert('Failed to copy code. Please copy manually: ' + verificationCode);
+                alert('Failed to copy code. Please copy manually: ' + commandWithCode);
             });
         }
     </script>
