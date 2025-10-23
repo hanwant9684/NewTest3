@@ -455,6 +455,17 @@ async def send_media(
 
 
 async def processMediaGroup(chat_message, bot, message, user_id=None):
+    """Process and download a media group (multiple files in one post)
+    
+    Args:
+        chat_message: The Telegram message containing the media group
+        bot: Bot client
+        message: User's message
+        user_id: User ID for dump channel tracking
+        
+    Returns:
+        int: Number of files successfully downloaded and sent (0 if failed)
+    """
     media_group_messages = await chat_message.get_media_group()
     valid_media = []
     temp_paths = []
@@ -600,10 +611,10 @@ async def processMediaGroup(chat_message, bot, message, user_id=None):
 
         for path in temp_paths + invalid_paths:
             cleanup_download(path)
-        return True
+        return len(valid_media)  # Return count of successfully sent files
 
     await progress_message.delete()
     await message.reply("❌ No valid media found in the media group.")
     for path in invalid_paths:
         cleanup_download(path)
-    return False
+    return 0  # Return 0 if no files were sent
