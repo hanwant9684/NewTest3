@@ -26,10 +26,6 @@ def cleanup_download(path: str) -> None:
         if os.path.isdir(folder) and not os.listdir(folder):
             os.rmdir(folder)
 
-        # Force garbage collection after file deletion to free memory immediately (important for Render's 512MB limit)
-        import gc
-        gc.collect()
-
     except Exception as e:
         LOGGER(__name__).error(f"Cleanup failed for {path}: {e}")
 
