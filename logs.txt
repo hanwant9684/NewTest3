@@ -1,19 +1,4 @@
-[22-Oct-25 02:24:52 PM - INFO] - __init__() - Line 30: cache - Cache initialized: max_size=500, ttl=180s
-[22-Oct-25 02:24:54 PM - INFO] - __init__() - Line 37: database - Successfully connected to MongoDB!
-[22-Oct-25 02:24:56 PM - INFO] - init_database() - Line 69: database - Database indexes created successfully
-[22-Oct-25 02:24:56 PM - INFO] - __init__() - Line 27: ad_monetization - Monetag ad network configured with 0 ad slot(s)
-[22-Oct-25 02:24:56 PM - INFO] - _log() - Line 97: werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
- * Running on all addresses (0.0.0.0)
- * Running on http://127.0.0.1:5000
- * Running on http://172.31.82.130:5000
-[22-Oct-25 02:24:56 PM - INFO] - _log() - Line 97: werkzeug - [33mPress CTRL+C to quit[0m
-[22-Oct-25 02:24:56 PM - INFO] - <module>() - Line 407: queue_manager - Queue limits: max_concurrent_users=5, max_concurrent_per_user=1, max_queue=15, memory_limit=380MB (constrained=True, render=False, replit=True)
-[22-Oct-25 02:24:56 PM - INFO] - __init__() - Line 48: queue_manager - Queue Manager initialized: 5 max users, 1 per user, 15 max queue, 380MB memory limit
-[22-Oct-25 02:24:56 PM - INFO] - start_processor() - Line 69: queue_manager - Queue processor started
-[22-Oct-25 02:24:56 PM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
-[22-Oct-25 02:24:56 PM - INFO] - _init_queue() - Line 1206: main - Download queue processor initialized
-[22-Oct-25 02:24:56 PM - INFO] - start_bot() - Line 119: __main__ - Starting Telegram bot from server.py (long polling)
-[22-Oct-25 02:25:03 PM - INFO] - start_bot() - Line 121: __main__ - Bot started successfully, waiting for updates...
-[22-Oct-25 03:03:12 PM - INFO] - _log() - Line 97: werkzeug - 172.31.82.130 - - [22/Oct/2025 15:03:12] "GET / HTTP/1.1" 200 -
-[22-Oct-25 03:04:43 PM - INFO] - _log() - Line 97: werkzeug - 172.31.82.130 - - [22/Oct/2025 15:04:43] "GET / HTTP/1.1" 200 -
-[22-Oct-25 03:05:28 PM - INFO] - _log() - Line 97: werkzeug - 172.31.82.130 - - [22/Oct/2025 15:05:28] "GET / HTTP/1.1" 200 -
+[23-Oct-25 03:12:37 AM - INFO] - __init__() - Line 30: cache - Cache initialized: max_size=500, ttl=180s
+[23-Oct-25 03:12:39 AM - INFO] - __init__() - Line 34: database - Successfully connected to MongoDB!
+[23-Oct-25 03:12:41 AM - INFO] - init_database() - Line 66: database - Database indexes created successfully
+[23-Oct-25 03:12:41 AM - INFO] - __init__() - Line 27: ad_monetization - Monetag ad network configured with 0 ad slot(s)

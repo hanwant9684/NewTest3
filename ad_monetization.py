@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from logger import LOGGER
 from database import db
 
-PREMIUM_DOWNLOADS = 5
+PREMIUM_DOWNLOADS = 1
 AD_WATCH_DURATION_SECONDS = 45
 SESSION_VALIDITY_MINUTES = 5
 

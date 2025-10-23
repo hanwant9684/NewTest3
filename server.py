@@ -15,17 +15,6 @@ app = Flask(__name__)
 compress = Compress()
 compress.init_app(app)
 
-# Suppress health check logs to reduce log spam from Render health checks
-import logging
-class HealthCheckFilter(logging.Filter):
-    def filter(self, record):
-        # Filter out /health endpoint access logs
-        return '/health' not in record.getMessage()
-
-# Apply filter to werkzeug logger
-werkzeug_logger = logging.getLogger('werkzeug')
-werkzeug_logger.addFilter(HealthCheckFilter())
-
 @app.route('/')
 def index():
     return jsonify({
@@ -119,6 +108,10 @@ def run_bot():
             main.LOGGER(__name__).info("Starting Telegram bot from server.py (long polling)")
             await main.bot.start()
             main.LOGGER(__name__).info("Bot started successfully, waiting for updates...")
+            
+            # Verify dump channel after bot starts
+            await main.verify_dump_channel()
+            
             # Keep the bot running without signal handlers (thread-safe alternative to idle())
             await asyncio.Event().wait()
         finally:

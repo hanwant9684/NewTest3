@@ -18,15 +18,12 @@ class DatabaseManager:
             raise ValueError("MongoDB connection string is required. Set MONGODB_URI environment variable.")
         
         try:
-            # Detect platform for optimal resource allocation
-            IS_RENDER = bool(os.getenv('RENDER') or os.getenv('RENDER_EXTERNAL_URL'))
-            
-            # Optimized connection settings for Render's 512MB RAM / Replit
+            # Optimized connection settings for Render/Replit
             self.client = MongoClient(
                 connection_string,
-                maxPoolSize=5 if IS_RENDER else 10,  # Even smaller pool for Render's 512MB RAM
+                maxPoolSize=10,  # Limit connections for 512MB RAM
                 minPoolSize=1,
-                maxIdleTimeMS=30000 if IS_RENDER else 45000,  # Close idle connections faster on Render
+                maxIdleTimeMS=45000,  # Close idle connections
                 serverSelectionTimeoutMS=5000,  # Faster timeout
                 connectTimeoutMS=10000,
                 socketTimeoutMS=10000,
@@ -312,16 +309,9 @@ class DatabaseManager:
             ad_downloads = user.get('ad_downloads', 0) if user else 0
             
             if ad_downloads > 0:
+                # Ad downloads bypass daily limits completely
                 # Calculate how many to use from ad downloads
                 ad_to_use = min(count, ad_downloads)
-                remaining_count = count - ad_to_use
-                
-                # If remaining count would exceed daily limit, check it first
-                if remaining_count > 0:
-                    daily_usage = self.get_daily_usage(user_id)
-                    if daily_usage + remaining_count > 5:
-                        LOGGER(__name__).warning(f"User {user_id} tried to exceed daily limit: {daily_usage} + {remaining_count} > 5")
-                        return False
                 
                 # Use ad downloads (only deduct what's available)
                 result = self.users.update_one(
@@ -332,21 +322,17 @@ class DatabaseManager:
                 if result.modified_count > 0:
                     LOGGER(__name__).info(f"User {user_id} used {ad_to_use} ad download(s), {ad_downloads - ad_to_use} remaining")
                     
-                    # If count exceeds ad_downloads, use daily usage for the rest
-                    if remaining_count > 0:
-                        date = datetime.now().strftime('%Y-%m-%d')
-                        self.daily_usage.update_one(
-                            {"user_id": user_id, "date": date},
-                            {"$inc": {"files_downloaded": remaining_count}},
-                            upsert=True
-                        )
-                        LOGGER(__name__).info(f"User {user_id} used {remaining_count} from daily quota after ad downloads depleted")
+                    # If count exceeds ad_downloads, user needs to watch more ads or upgrade
+                    # Don't fall back to daily quota - ad downloads are independent
+                    if count > ad_to_use:
+                        LOGGER(__name__).warning(f"User {user_id} needs {count - ad_to_use} more downloads after using all ad downloads")
+                        return False
                     return True
             
             # No ad downloads, use daily usage (validate limit)
             daily_usage = self.get_daily_usage(user_id)
-            if daily_usage + count > 5:
-                LOGGER(__name__).warning(f"User {user_id} tried to exceed daily limit: {daily_usage} + {count} > 5")
+            if daily_usage + count > 1:
+                LOGGER(__name__).warning(f"User {user_id} tried to exceed daily limit: {daily_usage} + {count} > 1")
                 return False
             
             date = datetime.now().strftime('%Y-%m-%d')
@@ -377,19 +363,20 @@ class DatabaseManager:
                 f"✅ **Download successful!**\n\n"
                 f"📥 **Ad downloads remaining:** {remaining_ad_downloads}\n\n"
                 "💎 **Want more free downloads?**\n"
-                "🎁 Use `/getpremium` - Watch ads and get 5 more downloads!\n"
+                "🎁 Use `/getpremium` - Watch ads and get 1 more download!\n"
                 "💰 Or upgrade to Premium: `/upgrade` - Unlimited downloads!"
             )
             return True, success_message
 
         daily_usage = self.get_daily_usage(user_id)
-        if daily_usage >= 5:
+        if daily_usage >= 1:
+            from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
             quota_message = (
-                "📊 **Daily limit reached (5 files)**\n\n"
+                "📊 **Daily limit reached (1 file)**\n\n"
                 "💎 **Get More Downloads:**\n\n"
                 "🎁 **FREE Option - Watch Ads:**\n"
-                "   • Use `/getpremium` command\n"
-                "   • Watch quick ads and get 5 free downloads!\n"
+                "   • Click button below or use `/getpremium` command\n"
+                "   • Watch quick ads and get 1 more download!\n"
                 "   • No waiting, instant access\n\n"
                 "💰 **Paid Option - $1/month:**\n"
                 "   • Use `/upgrade` to see payment options\n"
@@ -404,9 +391,9 @@ class DatabaseManager:
 
         completed_message = (
             f"✅ **Download complete!**\n\n"
-            f"📥 **Downloads completed today:** {daily_usage + 1}/5\n\n"
+            f"📥 **Downloads completed today:** {daily_usage + 1}/1\n\n"
             "💎 **Want unlimited downloads?**\n\n"
-            "🎁 **Get FREE Downloads:** Use `/getpremium` - Watch ads for 5 free downloads!\n"
+            "🎁 **Get FREE Downloads:** Use `/getpremium` - Watch ads for 1 more download!\n"
             "💰 **Or Pay $1/month:** Use `/upgrade` - Unlimited downloads forever!\n\n"
             "Both give you unlimited downloads + batch feature!"
         )

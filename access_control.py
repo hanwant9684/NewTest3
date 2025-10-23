@@ -87,7 +87,12 @@ def check_download_limit(func):
         # Check download limits
         can_download, message_text = db.can_download(user_id)
         if not can_download:
-            await message.reply(message_text)
+            from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+            keyboard = InlineKeyboardMarkup([
+                [InlineKeyboardButton("🎁 Watch Ad & Get 1 Download", callback_data="watch_ad_now")],
+                [InlineKeyboardButton("💰 Upgrade to Premium", callback_data="upgrade_premium")]
+            ])
+            await message.reply(message_text, reply_markup=keyboard)
             return
 
         # Show remaining downloads for free users with premium promotion

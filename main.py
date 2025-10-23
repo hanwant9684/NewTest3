@@ -154,7 +154,7 @@ async def start(_, message: Message):
         "━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
         "💎 **Get Free Downloads:**\n\n"
         "🎁 **Option 1: FREE (Watch Ads)**\n"
-        "   📥 5 free downloads per ad session\n"
+        "   📥 1 free download per ad session\n"
         "   📺 Complete quick verification steps\n"
         "   ♻️ Repeat anytime!\n"
         "   👉 Use: `/getpremium`\n\n"
@@ -242,13 +242,13 @@ async def help_command(_, message: Message):
             "   `/dl <link>` or just paste a link\n"
             "   📺 Videos • 🖼️ Photos • 🎵 Audio • 📄 Documents\n\n"
             "⚠️ **Your Limits:**\n"
-            "   📊 5 downloads per day\n"
+            "   📊 1 download per day\n"
             "   ⏳ Normal queue priority\n"
             "   ❌ No batch downloads\n\n"
             "━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
             "💎 **Get More Downloads:**\n\n"
             "🎁 **FREE Downloads (Watch Ads):**\n"
-            "   `/getpremium` - Get 5 free downloads\n"
+            "   `/getpremium` - Get 1 free download\n"
             "   📺 Complete verification steps\n"
             "   ♻️ Repeat anytime!\n\n"
             "💰 **Paid Premium ($1/month):**\n"
@@ -351,7 +351,7 @@ async def handle_download(bot: Client, message: Message, post_url: str, user_cli
         )
 
         if chat_message.media_group_id:
-            if not await processMediaGroup(chat_message, bot, message):
+            if not await processMediaGroup(chat_message, bot, message, message.from_user.id):
                 await message.reply(
                     "**Could not extract any valid media from the media group.**"
                 )
@@ -736,7 +736,7 @@ async def global_queue_status_command(client: Client, message: Message):
     status = await download_queue.get_global_status()
     await message.reply(status)
 
-@bot.on_message(filters.private & ~filters.command(["start", "help", "dl", "stats", "logs", "killall", "bdl", "myinfo", "upgrade", "premiumlist", "getpremium", "verifypremium", "login", "verify", "password", "logout", "cancel", "canceldownload", "queue", "qstatus", "setthumb", "delthumb", "viewthumb", "addadmin", "removeadmin", "setpremium", "removepremium", "ban", "unban", "broadcast", "adminstats", "userinfo"]))
+@bot.on_message(filters.private & ~filters.command(["start", "help", "dl", "stats", "logs", "killall", "bdl", "myinfo", "upgrade", "premiumlist", "getpremium", "verifypremium", "login", "verify", "password", "logout", "cancel", "canceldownload", "queue", "qstatus", "setthumb", "delthumb", "viewthumb", "addadmin", "removeadmin", "setpremium", "removepremium", "ban", "unban", "broadcast", "adminstats", "userinfo", "testdump"]))
 @force_subscribe
 @check_download_limit
 async def handle_any_message(bot: Client, message: Message):
@@ -903,6 +903,45 @@ async def unban_user_handler(client: Client, message: Message):
 async def broadcast_handler(client: Client, message: Message):
     await broadcast_command(client, message)
 
+@bot.on_message(filters.command("testdump") & filters.private)
+@admin_only
+async def test_dump_channel(bot: Client, message: Message):
+    """Test dump channel configuration (admin only)"""
+    from config import PyroConf
+    
+    if not PyroConf.DUMP_CHANNEL_ID:
+        await message.reply("❌ **Dump channel not configured**\n\nSet DUMP_CHANNEL_ID in your environment variables.")
+        return
+    
+    try:
+        channel_id = int(PyroConf.DUMP_CHANNEL_ID)
+        # Try to get chat info
+        chat = await bot.get_chat(channel_id)
+        
+        # Try sending a test message
+        test_msg = await bot.send_message(
+            chat_id=channel_id,
+            text=f"✅ **Dump Channel Test**\n\n👤 Test by Admin: {message.from_user.id}\n\nDump channel is working correctly!"
+        )
+        
+        await message.reply(
+            f"✅ **Dump Channel Working!**\n\n"
+            f"📱 **Channel:** {chat.title}\n"
+            f"🆔 **ID:** `{channel_id}`\n"
+            f"✉️ **Test message sent successfully**\n\n"
+            f"All downloaded media will be forwarded to this channel."
+        )
+    except Exception as e:
+        await message.reply(
+            f"❌ **Dump Channel Error**\n\n"
+            f"**Error:** {str(e)}\n\n"
+            f"**How to fix:**\n"
+            f"1. Forward any message from your channel to @userinfobot to get the correct channel ID\n"
+            f"2. Make sure bot is added to the channel\n"
+            f"3. Make bot an administrator with 'Post Messages' permission\n"
+            f"4. Update DUMP_CHANNEL_ID in Replit Secrets"
+        )
+
 @bot.on_message(filters.command("adminstats") & filters.private)
 async def admin_stats_handler(client: Client, message: Message):
     await admin_stats_command(client, message, queue_manager=download_queue)
@@ -954,18 +993,18 @@ async def get_premium_command(client: Client, message: Message):
         verification_code, ad_url = ad_monetization.generate_ad_link(message.from_user.id, bot_domain)
         
         premium_text = (
-            f"🎬 **Get {PREMIUM_DOWNLOADS} FREE downloads!**\n\n"
+            f"🎬 **Get {PREMIUM_DOWNLOADS} FREE download!**\n\n"
             "**How it works:**\n"
             "1️⃣ Click the button below\n"
-            "2️⃣ Complete 3 verification steps (10 seconds each)\n"
+            "2️⃣ Complete 3 verification steps (15 seconds each)\n"
             "3️⃣ Your verification code will appear at the end\n"
             "4️⃣ Copy the code and send: `/verifypremium <code>`\n\n"
             "⚠️ **Important:** Complete all verification steps to get your code!\n\n"
-            "⏱️ Code expires in 30 minutes"
+            "⏱️ Code expires in 5 minutes"
         )
         
         markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton("🎁 Get 5 FREE Downloads", url=ad_url)]
+            [InlineKeyboardButton("🎁 Get 1 FREE Download", url=ad_url)]
         ])
         
         await message.reply(premium_text, reply_markup=markup, disable_web_page_preview=True)
@@ -1116,18 +1155,18 @@ async def callback_handler(client: Client, callback_query: CallbackQuery):
         verification_code, ad_url = ad_monetization.generate_ad_link(user_id, bot_domain)
         
         premium_text = (
-            f"🎬 **Get {PREMIUM_DOWNLOADS} FREE downloads!**\n\n"
+            f"🎬 **Get {PREMIUM_DOWNLOADS} FREE download!**\n\n"
             "**How it works:**\n"
             "1️⃣ Click the button below\n"
-            "2️⃣ Complete 3 verification steps (10 seconds each)\n"
+            "2️⃣ Complete 3 verification steps (15 seconds each)\n"
             "3️⃣ Your verification code will appear at the end\n"
             "4️⃣ Copy the code and send: `/verifypremium <code>`\n\n"
             "⚠️ **Important:** Complete all verification steps to get your code!\n\n"
-            "⏱️ Code expires in 30 minutes"
+            "⏱️ Code expires in 5 minutes"
         )
         
         markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton("🎁 Get 5 FREE Downloads", url=ad_url)]
+            [InlineKeyboardButton("🎁 Get 1 FREE Download", url=ad_url)]
         ])
         
         await callback_query.answer()
@@ -1193,6 +1232,96 @@ async def callback_handler(client: Client, callback_query: CallbackQuery):
         )
         
         await callback_query.message.reply(upgrade_text, disable_web_page_preview=True)
+    
+    elif data == "watch_ad_now":
+        user_id = callback_query.from_user.id
+        user_type = db.get_user_type(user_id)
+        
+        if user_type == 'paid':
+            await callback_query.answer("You already have premium subscription!", show_alert=True)
+            return
+        
+        bot_domain = PyroConf.get_app_url()
+        verification_code, ad_url = ad_monetization.generate_ad_link(user_id, bot_domain)
+        
+        premium_text = (
+            f"🎬 **Get {PREMIUM_DOWNLOADS} FREE download!**\n\n"
+            "**How it works:**\n"
+            "1️⃣ Click the button below\n"
+            "2️⃣ Complete 3 verification steps (15 seconds each)\n"
+            "3️⃣ Your verification code will appear at the end\n"
+            "4️⃣ Copy the code and send: `/verifypremium <code>`\n\n"
+            "⚠️ **Important:** Complete all verification steps to get your code!\n\n"
+            "⏱️ Code expires in 5 minutes"
+        )
+        
+        markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🎁 Watch Ad & Get 1 Download", url=ad_url)]
+        ])
+        
+        await callback_query.answer()
+        await callback_query.message.reply(premium_text, reply_markup=markup, disable_web_page_preview=True)
+        LOGGER(__name__).info(f"User {user_id} requested ad-based download via button")
+    
+    elif data == "upgrade_premium":
+        await callback_query.answer()
+        
+        upgrade_text = (
+            "💎 **Upgrade to Premium**\n\n"
+            "**Premium Features:**\n"
+            "✅ Unlimited downloads per day\n"
+            "✅ Batch download support (/bdl command)\n"
+            "✅ Download up to 20 posts at once\n"
+            "✅ Priority support\n"
+            "✅ No daily limits\n\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "**🎯 Option 1: Watch Ads (FREE)**\n"
+            f"🎁 **Get {PREMIUM_DOWNLOADS} FREE Download**\n"
+            "📺 Just watch a short ad!\n\n"
+            "**How it works:**\n"
+            "1️⃣ Use `/getpremium` command\n"
+            "2️⃣ Complete 3 verification steps\n"
+            "3️⃣ Get verification code\n"
+            "4️⃣ Send code back to bot\n"
+            f"5️⃣ Enjoy {PREMIUM_DOWNLOADS} free download! 🎉\n\n"
+            "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "**💰 Option 2: Monthly Subscription**\n"
+            "💵 **30 Days Premium = $1 USD**\n\n"
+            "**How to Subscribe:**\n"
+        )
+        
+        payment_methods_available = PyroConf.PAYPAL_URL or PyroConf.UPI_ID or PyroConf.TELEGRAM_TON or PyroConf.CRYPTO_ADDRESS
+        
+        if payment_methods_available:
+            upgrade_text += "1️⃣ **Make Payment (Choose any method):**\n"
+            
+            if PyroConf.PAYPAL_URL:
+                upgrade_text += f"   💳 **PayPal:** {PyroConf.PAYPAL_URL}\n"
+            
+            if PyroConf.UPI_ID:
+                upgrade_text += f"   📱 **UPI (India):** `{PyroConf.UPI_ID}`\n"
+            
+            if PyroConf.TELEGRAM_TON:
+                upgrade_text += f"   🛒 **Telegram Pay (TON):** `{PyroConf.TELEGRAM_TON}`\n"
+            
+            if PyroConf.CRYPTO_ADDRESS:
+                upgrade_text += f"   ₿ **Crypto (USDT/BTC/ETH):** `{PyroConf.CRYPTO_ADDRESS}`\n"
+            
+            upgrade_text += "\n"
+        
+        if PyroConf.ADMIN_USERNAME:
+            upgrade_text += f"2️⃣ **Contact Admin:**\n   👤 @{PyroConf.ADMIN_USERNAME}\n\n"
+        else:
+            upgrade_text += f"2️⃣ **Contact Admin:**\n   👤 Contact the bot owner\n\n"
+        
+        upgrade_text += (
+            "3️⃣ **Send Payment Proof:**\n"
+            "   Send screenshot/transaction ID to admin\n\n"
+            "4️⃣ **Get Activated:**\n"
+            "   Admin will activate your premium within 24 hours!"
+        )
+        
+        await callback_query.message.reply(upgrade_text, disable_web_page_preview=True)
         
     else:
         await broadcast_callback_handler(client, callback_query)
@@ -1214,6 +1343,31 @@ except:
 
 # Verify bot attribution on startup
 verify_attribution()
+
+# Verify dump channel configuration on startup
+async def verify_dump_channel():
+    """Verify that dump channel is accessible if configured"""
+    from config import PyroConf
+    
+    if not PyroConf.DUMP_CHANNEL_ID:
+        LOGGER(__name__).info("Dump channel not configured (optional feature)")
+        return
+    
+    try:
+        channel_id = int(PyroConf.DUMP_CHANNEL_ID)
+        # Try to get channel info to verify bot has access
+        chat = await bot.get_chat(channel_id)
+        LOGGER(__name__).info(f"✅ Dump channel verified: {chat.title} (ID: {channel_id})")
+        LOGGER(__name__).info("All downloaded media will be forwarded to dump channel")
+    except Exception as e:
+        LOGGER(__name__).error(f"❌ Dump channel configuration error: {e}")
+        LOGGER(__name__).error(f"Make sure:")
+        LOGGER(__name__).error(f"  1. DUMP_CHANNEL_ID is correct (e.g., -1001234567890)")
+        LOGGER(__name__).error(f"  2. Bot is added to the channel as administrator")
+        LOGGER(__name__).error(f"  3. Bot has permission to post messages")
+        LOGGER(__name__).error(f"Dump channel feature will be disabled until fixed")
+
+# Note: Dump channel verification is called from server.py after bot starts
 
 if __name__ == "__main__":
     try:

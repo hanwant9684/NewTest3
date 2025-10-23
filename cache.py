@@ -99,10 +99,7 @@ class LRUCache:
 
 # Global cache instance
 # Using smaller cache for Render's 512MB RAM
-import os
-IS_RENDER = bool(os.getenv('RENDER') or os.getenv('RENDER_EXTERNAL_URL'))
-# Even smaller cache for Render to save memory
-_cache = LRUCache(max_size=250 if IS_RENDER else 500, default_ttl=180)  # 3 minutes TTL
+_cache = LRUCache(max_size=500, default_ttl=180)  # 3 minutes TTL
 
 
 def get_cache() -> LRUCache:
