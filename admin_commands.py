@@ -269,11 +269,14 @@ async def user_info_command(client: Client, message: Message):
         )
 
         if user_type == 'free':
-            remaining = 5 - daily_usage
+            ad_downloads = db.get_ad_downloads(user_id)
+            remaining = 1 - daily_usage
             user_info_text += (
-                f"**Today's Downloads:** `{daily_usage}/5`\n"
-                f"**Remaining:** `{remaining}`\n\n"
-                "💎 **Upgrade to Premium for unlimited downloads!**"
+                f"**Today's Downloads:** `{daily_usage}/1`\n"
+                f"**Remaining:** `{remaining}`\n"
+                f"**Ad Downloads:** `{ad_downloads}`\n\n"
+                "💎 **Upgrade to Premium for unlimited downloads!**\n"
+                "🎁 **Or use** `/getpremium` **to watch ads and get more downloads!**"
             )
         elif user_type == 'paid':
             user = db.get_user(user_id)

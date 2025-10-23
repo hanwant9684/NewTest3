@@ -13,3 +13,17 @@ dnspython
 waitress
 requests
 waitress
+dnspython
+flask
+flask-compress
+pillow
+psutil
+Pyleaves
+pymongo
+Pyrofork
+pyrogram
+python-dotenv
+requests
+TgCrypto
+uvloop
+waitress
