@@ -100,7 +100,8 @@ class DatabaseManager:
                     "is_banned": False,
                     "session_string": None,
                     "custom_thumbnail": None,
-                    "ad_downloads": 0
+                    "ad_downloads": 0,
+                    "ad_downloads_reset_date": now.strftime('%Y-%m-%d')
                 }
                 self.users.insert_one(user_doc)
             else:
@@ -323,6 +324,9 @@ class DatabaseManager:
             if user_type in ['admin', 'paid']:
                 return True
             
+            # Reset ad downloads if it's a new day (must happen before reading ad_downloads)
+            self.reset_ad_downloads_if_needed(user_id)
+            
             # Check if user has ad downloads
             user = self.get_user(user_id)
             ad_downloads = user.get('ad_downloads', 0) if user else 0
@@ -379,6 +383,9 @@ class DatabaseManager:
 
         if user_type in ['admin', 'paid']:
             return True, ""
+
+        # Reset ad downloads if it's a new day (must happen before reading ad_downloads)
+        self.reset_ad_downloads_if_needed(user_id)
 
         # Check ad downloads first
         user = self.get_user(user_id)
@@ -711,8 +718,11 @@ class DatabaseManager:
             return False
     
     def add_ad_downloads(self, user_id: int, count: int) -> bool:
-        """Add ad downloads to user account"""
+        """Add ad downloads to user account (resets to 0 first if it's a new day)"""
         try:
+            # Reset ad downloads if it's a new day (must happen before adding new credits)
+            self.reset_ad_downloads_if_needed(user_id)
+            
             result = self.users.update_one(
                 {"user_id": user_id},
                 {"$inc": {"ad_downloads": count}},
@@ -720,15 +730,47 @@ class DatabaseManager:
             )
             if result.modified_count > 0:
                 LOGGER(__name__).info(f"Added {count} ad downloads to user {user_id}")
+                # Clear cache to ensure fresh data on next read
+                self.cache.delete(f"user_{user_id}")
                 return True
             return False
         except Exception as e:
             LOGGER(__name__).error(f"Error adding ad downloads for {user_id}: {e}")
             return False
     
-    def get_ad_downloads(self, user_id: int) -> int:
-        """Get user's remaining ad downloads"""
+    def reset_ad_downloads_if_needed(self, user_id: int) -> None:
+        """Reset ad downloads to 0 if it's a new day"""
         try:
+            user = self.users.find_one({"user_id": user_id})
+            if not user:
+                return
+            
+            today = datetime.now().strftime('%Y-%m-%d')
+            last_reset = user.get('ad_downloads_reset_date', '')
+            
+            # If it's a new day, reset ad downloads to 0
+            if last_reset != today:
+                self.users.update_one(
+                    {"user_id": user_id},
+                    {
+                        "$set": {
+                            "ad_downloads": 0,
+                            "ad_downloads_reset_date": today
+                        }
+                    }
+                )
+                LOGGER(__name__).info(f"Reset ad downloads for user {user_id} (new day: {today})")
+                # Clear cache so next get_user call fetches fresh data
+                self.cache.delete(f"user_{user_id}")
+        except Exception as e:
+            LOGGER(__name__).error(f"Error resetting ad downloads for {user_id}: {e}")
+    
+    def get_ad_downloads(self, user_id: int) -> int:
+        """Get user's remaining ad downloads (resets daily at midnight)"""
+        try:
+            # Reset ad downloads if it's a new day
+            self.reset_ad_downloads_if_needed(user_id)
+            
             user = self.get_user(user_id)
             return user.get('ad_downloads', 0) if user else 0
         except Exception as e:

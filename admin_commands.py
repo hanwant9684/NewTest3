@@ -156,18 +156,102 @@ async def unban_user_command(client: Client, message: Message):
 
 @admin_only
 async def broadcast_command(client: Client, message: Message):
-    """Broadcast message to all users"""
+    """Broadcast message/media to all users
+    
+    Usage:
+    - Text: /broadcast <message>
+    - Media: Reply to a photo/video/audio/document/GIF with /broadcast <optional caption>
+    """
     try:
-        if len(message.command) < 2:
-            await message.reply(
-                "**Usage:** `/broadcast <message>`\n\n"
-                "**Example:** `/broadcast Hello everyone! New features are now available.`"
-            )
-            return
-
-        # Get the broadcast message (everything after /broadcast)
-        broadcast_message = message.text.split(' ', 1)[1]
-
+        broadcast_data = {}
+        
+        # Check if replying to a message with media
+        if message.reply_to_message:
+            replied_msg = message.reply_to_message
+            
+            # Extract caption from command or use original caption
+            caption = None
+            if len(message.command) > 1:
+                caption = message.text.split(' ', 1)[1]
+            elif replied_msg.caption:
+                caption = replied_msg.caption
+            
+            # Detect media type and extract file_id
+            if replied_msg.photo:
+                broadcast_data = {
+                    'type': 'photo',
+                    'file_id': replied_msg.photo.file_id,
+                    'caption': caption
+                }
+            elif replied_msg.video:
+                broadcast_data = {
+                    'type': 'video',
+                    'file_id': replied_msg.video.file_id,
+                    'caption': caption
+                }
+            elif replied_msg.audio:
+                broadcast_data = {
+                    'type': 'audio',
+                    'file_id': replied_msg.audio.file_id,
+                    'caption': caption
+                }
+            elif replied_msg.voice:
+                broadcast_data = {
+                    'type': 'voice',
+                    'file_id': replied_msg.voice.file_id,
+                    'caption': caption
+                }
+            elif replied_msg.document:
+                broadcast_data = {
+                    'type': 'document',
+                    'file_id': replied_msg.document.file_id,
+                    'caption': caption
+                }
+            elif replied_msg.animation:
+                broadcast_data = {
+                    'type': 'animation',
+                    'file_id': replied_msg.animation.file_id,
+                    'caption': caption
+                }
+            elif replied_msg.sticker:
+                broadcast_data = {
+                    'type': 'sticker',
+                    'file_id': replied_msg.sticker.file_id,
+                    'caption': None
+                }
+            else:
+                await message.reply("❌ **Unsupported media type or no media found in the replied message.**")
+                return
+        else:
+            # Text-only broadcast
+            if len(message.command) < 2:
+                await message.reply(
+                    "**📢 Broadcast Usage:**\n\n"
+                    "**Text:** `/broadcast <message>`\n"
+                    "**Media:** Reply to a photo/video/audio/document/GIF with `/broadcast <optional caption>`\n\n"
+                    "**Examples:**\n"
+                    "• `/broadcast Hello everyone! New features available.`\n"
+                    "• Reply to a photo: `/broadcast Check out this new update!`\n"
+                    "• Reply to a video (no caption): `/broadcast`"
+                )
+                return
+            
+            broadcast_data = {
+                'type': 'text',
+                'message': message.text.split(' ', 1)[1]
+            }
+        
+        # Create preview
+        if broadcast_data['type'] == 'text':
+            preview = broadcast_data['message'][:100] + "..." if len(broadcast_data['message']) > 100 else broadcast_data['message']
+            preview_text = f"**📢 Broadcast Preview (Text):**\n\n{preview}"
+        else:
+            media_type = broadcast_data['type'].upper()
+            caption_preview = broadcast_data.get('caption', 'No caption')
+            if caption_preview and len(caption_preview) > 100:
+                caption_preview = caption_preview[:100] + "..."
+            preview_text = f"**📢 Broadcast Preview ({media_type}):**\n\n{caption_preview or 'No caption'}"
+        
         # Confirm broadcast
         confirm_markup = InlineKeyboardMarkup([
             [
@@ -175,24 +259,22 @@ async def broadcast_command(client: Client, message: Message):
                 InlineKeyboardButton("❌ Cancel", callback_data="broadcast_cancel")
             ]
         ])
-
-        preview = broadcast_message[:100] + "..." if len(broadcast_message) > 100 else broadcast_message
-
+        
         await message.reply(
-            f"**📢 Broadcast Preview:**\n\n{preview}\n\n"
-            f"**Are you sure you want to send this message to all users?**",
+            f"{preview_text}\n\n"
+            f"**Are you sure you want to send this to all users?**",
             reply_markup=confirm_markup
         )
-
-        # Store broadcast message temporarily (you might want to use a proper cache)
-        setattr(client, f'pending_broadcast_{message.from_user.id}', broadcast_message)
-
+        
+        # Store broadcast data temporarily
+        setattr(client, f'pending_broadcast_{message.from_user.id}', broadcast_data)
+        
     except Exception as e:
         await message.reply(f"❌ **Error: {str(e)}**")
         LOGGER(__name__).error(f"Error in broadcast_command: {e}")
 
-async def execute_broadcast(client: Client, admin_id: int, broadcast_message: str):
-    """Execute the actual broadcast"""
+async def execute_broadcast(client: Client, admin_id: int, broadcast_data: dict):
+    """Execute the actual broadcast - supports text and all media types"""
     all_users = db.get_all_users()
     total_users = len(all_users)
     successful_sends = 0
@@ -200,18 +282,61 @@ async def execute_broadcast(client: Client, admin_id: int, broadcast_message: st
     if total_users == 0:
         return 0, 0
 
+    broadcast_type = broadcast_data.get('type', 'text')
+    
     # Send broadcast to all users
     for user_id in all_users:
         try:
-            await client.send_message(user_id, broadcast_message)
+            if broadcast_type == 'text':
+                await client.send_message(user_id, broadcast_data['message'])
+            elif broadcast_type == 'photo':
+                await client.send_photo(
+                    user_id, 
+                    broadcast_data['file_id'],
+                    caption=broadcast_data.get('caption')
+                )
+            elif broadcast_type == 'video':
+                await client.send_video(
+                    user_id, 
+                    broadcast_data['file_id'],
+                    caption=broadcast_data.get('caption')
+                )
+            elif broadcast_type == 'audio':
+                await client.send_audio(
+                    user_id, 
+                    broadcast_data['file_id'],
+                    caption=broadcast_data.get('caption')
+                )
+            elif broadcast_type == 'voice':
+                await client.send_voice(
+                    user_id, 
+                    broadcast_data['file_id'],
+                    caption=broadcast_data.get('caption')
+                )
+            elif broadcast_type == 'document':
+                await client.send_document(
+                    user_id, 
+                    broadcast_data['file_id'],
+                    caption=broadcast_data.get('caption')
+                )
+            elif broadcast_type == 'animation':
+                await client.send_animation(
+                    user_id, 
+                    broadcast_data['file_id'],
+                    caption=broadcast_data.get('caption')
+                )
+            elif broadcast_type == 'sticker':
+                await client.send_sticker(user_id, broadcast_data['file_id'])
+            
             successful_sends += 1
             await asyncio.sleep(0.1)  # Small delay to avoid rate limits
         except Exception as e:
             LOGGER(__name__).debug(f"Failed to send broadcast to {user_id}: {e}")
             continue
 
-    # Save broadcast history
-    db.save_broadcast(broadcast_message, admin_id, total_users, successful_sends)
+    # Save broadcast history (save caption or message as broadcast content)
+    broadcast_content = broadcast_data.get('message') or broadcast_data.get('caption') or f"[{broadcast_type.upper()} broadcast]"
+    db.save_broadcast(broadcast_content, admin_id, total_users, successful_sends)
 
     return total_users, successful_sends
 
@@ -309,18 +434,18 @@ async def broadcast_callback_handler(client: Client, callback_query):
             await callback_query.answer("❌ You are not authorized to confirm this broadcast.", show_alert=True)
             return
 
-        # Get the stored broadcast message
-        broadcast_message = getattr(client, f'pending_broadcast_{admin_id}', None)
+        # Get the stored broadcast data (text or media)
+        broadcast_data = getattr(client, f'pending_broadcast_{admin_id}', None)
 
-        if not broadcast_message:
-            await callback_query.edit_message_text("❌ **Broadcast message not found. Please try again.**")
+        if not broadcast_data:
+            await callback_query.edit_message_text("❌ **Broadcast data not found. Please try again.**")
             return
 
         # Update message to show processing
         await callback_query.edit_message_text("📡 **Sending broadcast... Please wait.**")
 
         # Execute broadcast
-        total_users, successful_sends = await execute_broadcast(client, admin_id, broadcast_message)
+        total_users, successful_sends = await execute_broadcast(client, admin_id, broadcast_data)
 
         # Clean up stored message
         if hasattr(client, f'pending_broadcast_{admin_id}'):

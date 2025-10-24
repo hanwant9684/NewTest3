@@ -1,4 +1,4 @@
-[23-Oct-25 02:12:41 PM - INFO] - __init__() - Line 31: cache - Cache initialized: max_size=200, ttl=180s
-[23-Oct-25 02:12:43 PM - INFO] - __init__() - Line 45: database - Successfully connected to MongoDB!
-[23-Oct-25 02:12:44 PM - INFO] - init_database() - Line 77: database - Database indexes created successfully
-[23-Oct-25 02:12:44 PM - INFO] - __init__() - Line 27: ad_monetization - Monetag ad network configured with 0 ad slot(s)
+[24-Oct-25 01:50:50 AM - INFO] - __init__() - Line 31: cache - Cache initialized: max_size=200, ttl=180s
+[24-Oct-25 01:50:52 AM - INFO] - __init__() - Line 45: database - Successfully connected to MongoDB!
+[24-Oct-25 01:50:54 AM - INFO] - init_database() - Line 77: database - Database indexes created successfully
+[24-Oct-25 01:50:54 AM - INFO] - __init__() - Line 27: ad_monetization - Monetag ad network configured with 0 ad slot(s)

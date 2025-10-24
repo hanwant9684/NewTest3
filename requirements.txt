@@ -27,3 +27,15 @@ requests
 TgCrypto
 uvloop
 waitress
+dnspython
+flask
+flask-compress
+pillow
+psutil
+Pyleaves
+pymongo
+Pyrofork
+pyrogram
+python-dotenv
+TgCrypto
+uvloop
