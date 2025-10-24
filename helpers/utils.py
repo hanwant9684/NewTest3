@@ -534,87 +534,88 @@ async def processMediaGroup(chat_message, bot, message, user_id=None):
 
     LOGGER(__name__).info(f"Valid media count: {len(valid_media)}")
 
-    if valid_media:
-        try:
-            await bot.send_media_group(chat_id=message.chat.id, media=valid_media)
-            
-            # Send to dump channel if configured
-            if user_id:
-                from config import PyroConf
-                if PyroConf.DUMP_CHANNEL_ID:
-                    try:
-                        # Prepare media group for dump channel with user info
-                        dump_media = []
-                        for idx, media in enumerate(valid_media):
-                            dump_caption = f"👤 User ID: `{user_id}`"
-                            if media.caption:
-                                dump_caption += f"\n\n📝 Original Caption:\n{media.caption[:700]}"
+    try:
+        if valid_media:
+            try:
+                await bot.send_media_group(chat_id=message.chat.id, media=valid_media)
+                
+                # Send to dump channel if configured
+                if user_id:
+                    from config import PyroConf
+                    if PyroConf.DUMP_CHANNEL_ID:
+                        try:
+                            # Prepare media group for dump channel with user info
+                            dump_media = []
+                            for idx, media in enumerate(valid_media):
+                                dump_caption = f"👤 User ID: `{user_id}`"
+                                if media.caption:
+                                    dump_caption += f"\n\n📝 Original Caption:\n{media.caption[:700]}"
+                                
+                                if isinstance(media, InputMediaPhoto):
+                                    dump_media.append(InputMediaPhoto(media=media.media, caption=dump_caption if idx == 0 else ""))
+                                elif isinstance(media, InputMediaVideo):
+                                    dump_media.append(InputMediaVideo(media=media.media, caption=dump_caption if idx == 0 else ""))
+                                elif isinstance(media, InputMediaDocument):
+                                    dump_media.append(InputMediaDocument(media=media.media, caption=dump_caption if idx == 0 else ""))
+                                elif isinstance(media, InputMediaAudio):
+                                    dump_media.append(InputMediaAudio(media=media.media, caption=dump_caption if idx == 0 else ""))
                             
-                            if isinstance(media, InputMediaPhoto):
-                                dump_media.append(InputMediaPhoto(media=media.media, caption=dump_caption if idx == 0 else ""))
-                            elif isinstance(media, InputMediaVideo):
-                                dump_media.append(InputMediaVideo(media=media.media, caption=dump_caption if idx == 0 else ""))
-                            elif isinstance(media, InputMediaDocument):
-                                dump_media.append(InputMediaDocument(media=media.media, caption=dump_caption if idx == 0 else ""))
-                            elif isinstance(media, InputMediaAudio):
-                                dump_media.append(InputMediaAudio(media=media.media, caption=dump_caption if idx == 0 else ""))
-                        
-                        await bot.send_media_group(chat_id=PyroConf.DUMP_CHANNEL_ID, media=dump_media)
-                        LOGGER(__name__).info(f"Sent media group to dump channel for user {user_id}")
-                    except Exception as e:
-                        LOGGER(__name__).warning(f"Failed to send media group to dump channel: {e}")
-            
-            await progress_message.delete()
-        except Exception:
-            await message.reply(
-                "**❌ Failed to send media group, trying individual uploads**"
-            )
-            for media in valid_media:
-                try:
-                    if isinstance(media, InputMediaPhoto):
-                        await bot.send_photo(
-                            chat_id=message.chat.id,
-                            photo=media.media,
-                            caption=media.caption,
+                            await bot.send_media_group(chat_id=PyroConf.DUMP_CHANNEL_ID, media=dump_media)
+                            LOGGER(__name__).info(f"Sent media group to dump channel for user {user_id}")
+                        except Exception as e:
+                            LOGGER(__name__).warning(f"Failed to send media group to dump channel: {e}")
+                
+                await progress_message.delete()
+            except Exception:
+                await message.reply(
+                    "**❌ Failed to send media group, trying individual uploads**"
+                )
+                for media in valid_media:
+                    try:
+                        if isinstance(media, InputMediaPhoto):
+                            await bot.send_photo(
+                                chat_id=message.chat.id,
+                                photo=media.media,
+                                caption=media.caption,
+                            )
+                        elif isinstance(media, InputMediaVideo):
+                            await bot.send_video(
+                                chat_id=message.chat.id,
+                                video=media.media,
+                                duration=media.duration,
+                                caption=media.caption,
+                            )
+                        elif isinstance(media, InputMediaDocument):
+                            await bot.send_document(
+                                chat_id=message.chat.id,
+                                document=media.media,
+                                caption=media.caption,
+                            )
+                        elif isinstance(media, InputMediaAudio):
+                            await bot.send_audio(
+                                chat_id=message.chat.id,
+                                audio=media.media,
+                                caption=media.caption,
+                            )
+                        elif isinstance(media, Voice):
+                            await bot.send_voice(
+                                chat_id=message.chat.id,
+                                voice=media.media,
+                                caption=media.caption,
+                            )
+                    except Exception as individual_e:
+                        await message.reply(
+                            f"Failed to upload individual media: {individual_e}"
                         )
-                    elif isinstance(media, InputMediaVideo):
-                        await bot.send_video(
-                            chat_id=message.chat.id,
-                            video=media.media,
-                            duration=media.duration,
-                            caption=media.caption,
-                        )
-                    elif isinstance(media, InputMediaDocument):
-                        await bot.send_document(
-                            chat_id=message.chat.id,
-                            document=media.media,
-                            caption=media.caption,
-                        )
-                    elif isinstance(media, InputMediaAudio):
-                        await bot.send_audio(
-                            chat_id=message.chat.id,
-                            audio=media.media,
-                            caption=media.caption,
-                        )
-                    elif isinstance(media, Voice):
-                        await bot.send_voice(
-                            chat_id=message.chat.id,
-                            voice=media.media,
-                            caption=media.caption,
-                        )
-                except Exception as individual_e:
-                    await message.reply(
-                        f"Failed to upload individual media: {individual_e}"
-                    )
 
-            await progress_message.delete()
+                await progress_message.delete()
 
+            return len(valid_media)  # Return count of successfully sent files
+
+        await progress_message.delete()
+        await message.reply("❌ No valid media found in the media group.")
+        return 0  # Return 0 if no files were sent
+    finally:
+        # CRITICAL: Always cleanup all downloaded files, even if errors occur during upload
         for path in temp_paths + invalid_paths:
             cleanup_download(path)
-        return len(valid_media)  # Return count of successfully sent files
-
-    await progress_message.delete()
-    await message.reply("❌ No valid media found in the media group.")
-    for path in invalid_paths:
-        cleanup_download(path)
-    return 0  # Return 0 if no files were sent
