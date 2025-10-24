@@ -484,6 +484,8 @@ class DatabaseManager:
                 {"user_id": user_id},
                 {"$set": {"session_string": session_string}}
             )
+            # IMPORTANT: Invalidate cache so get_user_session returns updated data
+            self.cache.delete(f"user_{user_id}")
             return result.modified_count > 0 or result.matched_count > 0
         except Exception as e:
             LOGGER(__name__).error(f"Error setting session for {user_id}: {e}")

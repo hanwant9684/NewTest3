@@ -133,6 +133,7 @@ async def get_user_client(user_id: int):
         from pyrogram import Client
         from config import PyroConf
         import os
+        import traceback
 
         try:
             # Optimize resources for constrained environments
@@ -148,12 +149,19 @@ async def get_user_client(user_id: int):
                 sleep_threshold=30,
                 in_memory=True  # Use in-memory sessions to avoid file leaks
             )
+            LOGGER(__name__).info(f"Starting user client for {user_id}...")
             await user_client.start()
+            LOGGER(__name__).info(f"Successfully started user client for {user_id}")
             return user_client
         except Exception as e:
             LOGGER(__name__).error(f"Failed to start user client for {user_id}: {e}")
-            # Clear invalid session from database
-            db.set_user_session(user_id, None)
+            LOGGER(__name__).error(f"Full traceback: {traceback.format_exc()}")
+            # Don't immediately clear session - it might be a temporary network issue
+            # Only clear if it's an authorization error
+            error_msg = str(e).lower()
+            if 'auth' in error_msg or 'session' in error_msg or 'expired' in error_msg:
+                LOGGER(__name__).warning(f"Clearing invalid session for user {user_id}")
+                db.set_user_session(user_id, None)
             return None
     return None
 

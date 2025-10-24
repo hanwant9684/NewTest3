@@ -11,3 +11,16 @@ pymongo
 dnspython
 waitress
 requests
+dnspython
+flask
+flask-compress
+psutil
+Pyleaves
+pymongo
+Pyrofork
+pyrogram
+python-dotenv
+requests
+TgCrypto
+uvloop
+waitress

@@ -81,19 +81,24 @@ class PhoneAuthHandler:
         cleaned_code = ''.join(filter(str.isdigit, otp_code))
 
         try:
+            LOGGER(__name__).info(f"Attempting sign_in for user {user_id}")
             await client.sign_in(
                 phone_number=phone_number,
                 phone_code_hash=phone_code_hash,
                 phone_code=cleaned_code
             )
+            LOGGER(__name__).info(f"Sign_in successful for user {user_id}, exporting session...")
 
             session_string = await client.export_session_string()
+            LOGGER(__name__).info(f"Session string exported for user {user_id}, length: {len(session_string) if session_string else 0}")
 
             await client.disconnect()
+            LOGGER(__name__).info(f"Client disconnected for user {user_id}")
 
             del self.pending_auth[user_id]
+            LOGGER(__name__).info(f"Removed from pending_auth for user {user_id}")
 
-            LOGGER(__name__).info(f"User {user_id} successfully authenticated with phone {phone_number}")
+            LOGGER(__name__).info(f"User {user_id} successfully authenticated with phone {phone_number}, returning session_string")
 
             return True, "✅ **Authentication successful!**\n\nYou can now download content from channels you've joined.", False, session_string
 

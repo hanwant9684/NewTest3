@@ -694,20 +694,33 @@ async def verify_command(client: Client, message: Message):
         otp_code = ' '.join(message.command[1:])
 
         # Verify OTP
+        LOGGER(__name__).info(f"Calling verify_otp for user {message.from_user.id}")
         result = await phone_auth_handler.verify_otp(message.from_user.id, otp_code)
+        LOGGER(__name__).info(f"verify_otp returned {len(result)} items for user {message.from_user.id}")
 
         if len(result) == 4:
             success, msg, needs_2fa, session_string = result
+            LOGGER(__name__).info(f"Received session_string for user {message.from_user.id}, length: {len(session_string) if session_string else 0}")
         else:
             success, msg, needs_2fa = result
             session_string = None
+            LOGGER(__name__).warning(f"No session_string in result for user {message.from_user.id}")
 
         await message.reply(msg)
 
         # Save session string if authentication successful
         if success and session_string:
-            db.set_user_session(message.from_user.id, session_string)
-            LOGGER(__name__).info(f"Saved session for user {message.from_user.id}")
+            LOGGER(__name__).info(f"Attempting to save session for user {message.from_user.id}")
+            result = db.set_user_session(message.from_user.id, session_string)
+            LOGGER(__name__).info(f"Session save result for user {message.from_user.id}: {result}")
+            # Verify it was saved
+            saved_session = db.get_user_session(message.from_user.id)
+            if saved_session:
+                LOGGER(__name__).info(f"✅ Verified: Session successfully saved and retrieved for user {message.from_user.id}")
+            else:
+                LOGGER(__name__).error(f"❌ ERROR: Session save failed! Could not retrieve session for user {message.from_user.id}")
+        else:
+            LOGGER(__name__).info(f"Not saving session for user {message.from_user.id} - success: {success}, has_session_string: {session_string is not None}")
 
     except Exception as e:
         await message.reply(f"❌ **Error: {str(e)}**")
@@ -793,11 +806,32 @@ async def global_queue_status_command(client: Client, message: Message):
 @check_download_limit
 async def handle_any_message(bot: Client, message: Message):
     if message.text and not message.text.startswith("/"):
-        # Check if user has personal session
-        user_client = await get_user_client(message.from_user.id)
-        
         # Check if user is premium for queue priority
         is_premium = db.get_user_type(message.from_user.id) in ['premium', 'admin']
+        
+        # Check if user already has an active download (quick check before getting client)
+        async with download_queue._lock:
+            if message.from_user.id in download_queue.user_queue_positions or message.from_user.id in download_queue.active_downloads:
+                position = download_queue.get_queue_position(message.from_user.id)
+                if message.from_user.id in download_queue.active_downloads:
+                    await message.reply(
+                        "❌ **You already have a download in progress!**\n\n"
+                        "⏳ Please wait for it to complete.\n\n"
+                        "💡 **Want to download this instead?**\n"
+                        "Use `/canceldownload` to cancel the current download."
+                    )
+                    return
+                else:
+                    await message.reply(
+                        f"❌ **You already have a download in the queue!**\n\n"
+                        f"📍 **Position:** #{position}/{len(download_queue.waiting_queue)}\n\n"
+                        f"💡 **Want to cancel it?**\n"
+                        f"Use `/canceldownload` to remove from queue."
+                    )
+                    return
+        
+        # Check if user has personal session
+        user_client = await get_user_client(message.from_user.id)
         
         # Add to download queue
         download_coro = handle_download(bot, message, message.text, user_client, True)
@@ -809,7 +843,8 @@ async def handle_any_message(bot: Client, message: Message):
             is_premium
         )
         
-        await message.reply(msg)
+        if msg:  # Only reply if there's a message to send
+            await message.reply(msg)
 
 @bot.on_message(filters.command("stats") & filters.private)
 @register_user

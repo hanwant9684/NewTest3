@@ -1,26 +1,20 @@
-[24-Oct-25 09:12:35 AM - INFO] - __init__() - Line 31: cache - Cache initialized: max_size=200, ttl=180s
-[24-Oct-25 09:12:37 AM - INFO] - __init__() - Line 45: database - Successfully connected to MongoDB!
-[24-Oct-25 09:12:39 AM - INFO] - init_database() - Line 77: database - Database indexes created successfully
-[24-Oct-25 09:12:39 AM - INFO] - __init__() - Line 27: ad_monetization - Monetag ad network configured with 0 ad slot(s)
-[24-Oct-25 09:12:39 AM - INFO] - _log() - Line 97: werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+[24-Oct-25 10:39:23 AM - INFO] - __init__() - Line 31: cache - Cache initialized: max_size=200, ttl=180s
+[24-Oct-25 10:39:25 AM - INFO] - __init__() - Line 45: database - Successfully connected to MongoDB!
+[24-Oct-25 10:39:26 AM - INFO] - init_database() - Line 77: database - Database indexes created successfully
+[24-Oct-25 10:39:26 AM - INFO] - __init__() - Line 27: ad_monetization - Monetag ad network configured with 0 ad slot(s)
+[24-Oct-25 10:39:26 AM - INFO] - _log() - Line 97: werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
  * Running on all addresses (0.0.0.0)
  * Running on http://127.0.0.1:5000
- * Running on http://172.31.77.226:5000
-[24-Oct-25 09:12:39 AM - INFO] - _log() - Line 97: werkzeug - [33mPress CTRL+C to quit[0m
-[24-Oct-25 09:12:41 AM - INFO] - <module>() - Line 37: helpers.utils - PIL not available - thumbnails will be skipped for better RAM efficiency
-[24-Oct-25 09:12:41 AM - INFO] - __init__() - Line 37: queue_manager - Queue Manager initialized: 10 concurrent, 50 max queue
-[24-Oct-25 09:12:41 AM - INFO] - start_processor() - Line 43: queue_manager - Queue processor started
-[24-Oct-25 09:12:41 AM - INFO] - _init_queue() - Line 1397: main - Download queue processor initialized
-[24-Oct-25 09:12:41 AM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
-[24-Oct-25 09:12:41 AM - INFO] - start_bot() - Line 108: __main__ - Starting Telegram bot from server.py (long polling)
-[24-Oct-25 09:12:42 AM - INFO] - _log() - Line 97: werkzeug - 172.31.77.226 - - [24/Oct/2025 09:12:42] "GET / HTTP/1.1" 200 -
-[24-Oct-25 09:12:47 AM - INFO] - start_bot() - Line 115: __main__ - Bot started successfully, waiting for updates...
-[24-Oct-25 09:12:47 AM - INFO] - start_cleanup_task() - Line 191: phone_auth - Started auth session cleanup task
-[24-Oct-25 09:12:47 AM - INFO] - start_bot() - Line 123: __main__ - Started periodic download cleanup task
-[24-Oct-25 09:12:47 AM - ERROR] - verify_dump_channel() - Line 1425: main - ❌ Dump channel configuration error: Peer id invalid: -1003042213082
-[24-Oct-25 09:12:47 AM - ERROR] - verify_dump_channel() - Line 1426: main - Make sure:
-[24-Oct-25 09:12:47 AM - ERROR] - verify_dump_channel() - Line 1427: main -   1. DUMP_CHANNEL_ID is correct (e.g., -1001234567890)
-[24-Oct-25 09:12:47 AM - ERROR] - verify_dump_channel() - Line 1428: main -   2. Bot is added to the channel as administrator
-[24-Oct-25 09:12:47 AM - ERROR] - verify_dump_channel() - Line 1429: main -   3. Bot has permission to post messages
-[24-Oct-25 09:12:47 AM - ERROR] - verify_dump_channel() - Line 1430: main - Dump channel feature will be disabled until fixed
-[24-Oct-25 09:13:25 AM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
+ * Running on http://172.31.67.66:5000
+[24-Oct-25 10:39:26 AM - INFO] - _log() - Line 97: werkzeug - [33mPress CTRL+C to quit[0m
+[24-Oct-25 10:39:27 AM - INFO] - <module>() - Line 37: helpers.utils - PIL not available - thumbnails will be skipped for better RAM efficiency
+[24-Oct-25 10:39:27 AM - INFO] - __init__() - Line 37: queue_manager - Queue Manager initialized: 10 concurrent, 50 max queue
+[24-Oct-25 10:39:27 AM - INFO] - start_processor() - Line 43: queue_manager - Queue processor started
+[24-Oct-25 10:39:27 AM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
+[24-Oct-25 10:39:27 AM - INFO] - _init_queue() - Line 1432: main - Download queue processor initialized
+[24-Oct-25 10:39:27 AM - INFO] - start_bot() - Line 108: __main__ - Starting Telegram bot from server.py (long polling)
+[24-Oct-25 10:39:34 AM - INFO] - start_bot() - Line 115: __main__ - Bot started successfully, waiting for updates...
+[24-Oct-25 10:39:34 AM - INFO] - start_cleanup_task() - Line 196: phone_auth - Started auth session cleanup task
+[24-Oct-25 10:39:34 AM - INFO] - start_bot() - Line 123: __main__ - Started periodic download cleanup task
+[24-Oct-25 10:39:34 AM - INFO] - verify_dump_channel() - Line 1457: main - ✅ Dump channel verified: Dump (ID: -1003042213082)
+[24-Oct-25 10:39:34 AM - INFO] - verify_dump_channel() - Line 1458: main - All downloaded media will be forwarded to dump channel
