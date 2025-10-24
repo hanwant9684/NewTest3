@@ -1,41 +1,66 @@
-[24-Oct-25 04:17:15 AM - INFO] - __init__() - Line 31: cache - Cache initialized: max_size=200, ttl=180s
-[24-Oct-25 04:17:18 AM - INFO] - __init__() - Line 45: database - Successfully connected to MongoDB!
-[24-Oct-25 04:17:19 AM - INFO] - init_database() - Line 77: database - Database indexes created successfully
-[24-Oct-25 04:17:19 AM - INFO] - __init__() - Line 27: ad_monetization - Monetag ad network configured with 0 ad slot(s)
-[24-Oct-25 04:17:19 AM - INFO] - _log() - Line 97: werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+[24-Oct-25 08:12:23 AM - INFO] - __init__() - Line 31: cache - Cache initialized: max_size=200, ttl=180s
+[24-Oct-25 08:12:26 AM - INFO] - __init__() - Line 45: database - Successfully connected to MongoDB!
+[24-Oct-25 08:12:27 AM - INFO] - init_database() - Line 77: database - Database indexes created successfully
+[24-Oct-25 08:12:27 AM - INFO] - __init__() - Line 27: ad_monetization - Monetag ad network configured with 0 ad slot(s)
+[24-Oct-25 08:12:27 AM - INFO] - _log() - Line 97: werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
  * Running on all addresses (0.0.0.0)
  * Running on http://127.0.0.1:5000
- * Running on http://172.31.90.2:5000
-[24-Oct-25 04:17:19 AM - INFO] - _log() - Line 97: werkzeug - [33mPress CTRL+C to quit[0m
-[24-Oct-25 04:17:21 AM - INFO] - __init__() - Line 37: queue_manager - Queue Manager initialized: 10 concurrent, 50 max queue
-[24-Oct-25 04:17:21 AM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
-[24-Oct-25 04:17:21 AM - INFO] - start_bot() - Line 108: __main__ - Starting Telegram bot from server.py (long polling)
-[24-Oct-25 04:17:21 AM - INFO] - start_processor() - Line 43: queue_manager - Queue processor started
-[24-Oct-25 04:17:21 AM - INFO] - _init_queue() - Line 1394: main - Download queue processor initialized
-[24-Oct-25 04:17:27 AM - INFO] - start_bot() - Line 115: __main__ - Bot started successfully, waiting for updates...
-[24-Oct-25 04:17:27 AM - INFO] - start_cleanup_task() - Line 191: phone_auth - Started auth session cleanup task
-[24-Oct-25 04:17:27 AM - INFO] - start_bot() - Line 123: __main__ - Started periodic download cleanup task
-[24-Oct-25 04:17:28 AM - INFO] - verify_dump_channel() - Line 1419: main - ✅ Dump channel verified: Dump (ID: -1003042213082)
-[24-Oct-25 04:17:28 AM - INFO] - verify_dump_channel() - Line 1420: main - All downloaded media will be forwarded to dump channel
-[24-Oct-25 04:32:44 AM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
-[24-Oct-25 04:32:57 AM - INFO] - get_app_url() - Line 132: config - Detected Replit domain: https://6bee72a8-40f9-42bb-a520-d024aeae5f57-00-3tvqskibd8lo1.picard.replit.dev
-[24-Oct-25 04:32:58 AM - INFO] - create_ad_session() - Line 42: ad_monetization - Created ad session e87cf6a7aefe8f5acb8c87dfe7588438 for user 7481690649
-[24-Oct-25 04:32:58 AM - INFO] - generate_ad_link() - Line 139: ad_monetization - Generated ad session e87cf6a7aefe8f5acb8c87dfe7588438 for user 7481690649
-[24-Oct-25 04:32:58 AM - INFO] - callback_handler() - Line 1323: main - User 7481690649 requested ad-based download via button
-[24-Oct-25 04:33:02 AM - INFO] - _log() - Line 97: werkzeug - 172.31.90.2 - - [24/Oct/2025 04:33:02] "GET /watch-ad?session=e87cf6a7aefe8f5acb8c87dfe7588438 HTTP/1.1" 200 -
-[24-Oct-25 04:33:05 AM - INFO] - _log() - Line 97: werkzeug - 172.31.90.2 - - [24/Oct/2025 04:33:05] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
-[24-Oct-25 04:33:54 AM - INFO] - _generate_verification_code() - Line 83: ad_monetization - Generated verification code D96C656A for user 7481690649
-[24-Oct-25 04:33:54 AM - INFO] - verify_ad_completion() - Line 75: ad_monetization - User 7481690649 completed ad session e87cf6a7aefe8f5acb8c87dfe7588438, generated code D96C656A
-[24-Oct-25 04:33:54 AM - INFO] - _log() - Line 97: werkzeug - 172.31.90.2 - - [24/Oct/2025 04:33:54] "GET /verify-ad?session=e87cf6a7aefe8f5acb8c87dfe7588438 HTTP/1.1" 200 -
-[24-Oct-25 04:34:00 AM - INFO] - verify_premium_command() - Line 1080: main - verify_premium_command triggered by user 7481690649
-[24-Oct-25 04:34:01 AM - INFO] - add_ad_downloads() - Line 696: database - Added 1 ad downloads to user 7481690649
-[24-Oct-25 04:34:01 AM - INFO] - verify_code() - Line 107: ad_monetization - User 7481690649 successfully verified code D96C656A, granted 1 ad downloads
-[24-Oct-25 04:34:01 AM - INFO] - verify_premium_command() - Line 1096: main - User 7481690649 successfully verified ad code and received downloads
-[24-Oct-25 04:34:08 AM - ERROR] - wrapper() - Line 194: access_control - Error checking channel membership: Telegram says: [400 MESSAGE_EMPTY] (caused by "messages.SendMessage") Pyrogram 2.3.68 thinks: The message sent is empty or contains invalid characters
-[24-Oct-25 04:34:09 AM - INFO] - handle_download() - Line 329: main - Downloading media from URL: https://t.me/c/2922670555/732
-[24-Oct-25 04:34:13 AM - INFO] - handle_download() - Line 430: main - Downloaded media: /home/runner/workspace/downloads/1792/(RPSC_ASSIGNMENT_&_ASSIGNMENT__20240213151116.pdf
-[24-Oct-25 04:34:13 AM - INFO] - send_media() - Line 271: helpers.utils - Uploading media: /home/runner/workspace/downloads/1792/(RPSC_ASSIGNMENT_&_ASSIGNMENT__20240213151116.pdf (document)
-[24-Oct-25 04:34:21 AM - INFO] - send_to_dump_channel() - Line 252: helpers.utils - Sent document to dump channel for user 7481690649
-[24-Oct-25 04:34:21 AM - INFO] - cleanup_download() - Line 18: helpers.files - Cleaning Download: /home/runner/workspace/downloads/1792/(RPSC_ASSIGNMENT_&_ASSIGNMENT__20240213151116.pdf
-[24-Oct-25 04:34:22 AM - INFO] - increment_usage() - Line 348: database - User 7481690649 used 1 ad download(s), 0 remaining
-[24-Oct-25 04:34:23 AM - INFO] - _execute_download() - Line 142: queue_manager - Download completed for user 7481690649. Active: 0
+ * Running on http://172.31.83.2:5000
+[24-Oct-25 08:12:27 AM - INFO] - _log() - Line 97: werkzeug - [33mPress CTRL+C to quit[0m
+[24-Oct-25 08:12:28 AM - INFO] - __init__() - Line 37: queue_manager - Queue Manager initialized: 10 concurrent, 50 max queue
+[24-Oct-25 08:12:28 AM - INFO] - start_processor() - Line 43: queue_manager - Queue processor started
+[24-Oct-25 08:12:28 AM - INFO] - _init_queue() - Line 1397: main - Download queue processor initialized
+[24-Oct-25 08:12:28 AM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
+[24-Oct-25 08:12:28 AM - INFO] - start_bot() - Line 108: __main__ - Starting Telegram bot from server.py (long polling)
+[24-Oct-25 08:12:29 AM - INFO] - _log() - Line 97: werkzeug - 172.31.83.2 - - [24/Oct/2025 08:12:29] "GET / HTTP/1.1" 200 -
+[24-Oct-25 08:12:34 AM - INFO] - start_bot() - Line 115: __main__ - Bot started successfully, waiting for updates...
+[24-Oct-25 08:12:34 AM - INFO] - start_cleanup_task() - Line 191: phone_auth - Started auth session cleanup task
+[24-Oct-25 08:12:34 AM - INFO] - start_bot() - Line 123: __main__ - Started periodic download cleanup task
+[24-Oct-25 08:12:35 AM - INFO] - verify_dump_channel() - Line 1422: main - ✅ Dump channel verified: Dump (ID: -1003042213082)
+[24-Oct-25 08:12:35 AM - INFO] - verify_dump_channel() - Line 1423: main - All downloaded media will be forwarded to dump channel
+[24-Oct-25 08:14:57 AM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
+[24-Oct-25 08:15:08 AM - ERROR] - _handle_exception() - Line 433: pyrogram.dispatcher - Unhandled exception: Telegram says: [400 MESSAGE_EMPTY] (caused by "messages.SendMessage") Pyrogram 2.3.68 thinks: The message sent is empty or contains invalid characters
+Traceback (most recent call last):
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pyrogram/dispatcher.py", line 378, in _dispatch_to_handlers
+    await self._execute_handler(handler, *args)
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pyrogram/dispatcher.py", line 405, in _execute_handler
+    await handler.callback(self.client, *args)
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pyrogram/handlers/message_handler.py", line 154, in resolve_future_or_callback
+    await self.original_callback(client, message, *args)
+  File "/home/runner/workspace/access_control.py", line 172, in wrapper
+    return await func(client, message)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/access_control.py", line 108, in wrapper
+    return await func(client, message)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/main.py", line 812, in handle_any_message
+    await message.reply(msg)
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pyrogram/sync.py", line 75, in coro_wrapper
+    return await asyncio.wrap_future(asyncio.run_coroutine_threadsafe(coroutine, main_loop))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pyrogram/types/messages_and_media/message.py", line 1610, in reply_text
+    return await self._client.send_message(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pyrogram/sync.py", line 75, in coro_wrapper
+    return await asyncio.wrap_future(asyncio.run_coroutine_threadsafe(coroutine, main_loop))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pyrogram/methods/messages/send_message.py", line 212, in send_message
+    r = await self.invoke(rpc)
+        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pyrogram/sync.py", line 75, in coro_wrapper
+    return await asyncio.wrap_future(asyncio.run_coroutine_threadsafe(coroutine, main_loop))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pyrogram/methods/advanced/invoke.py", line 80, in invoke
+    r = await self.session.invoke(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pyrogram/session/session.py", line 420, in invoke
+    return await self.send(query, timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pyrogram/session/session.py", line 377, in send
+    RPCError.raise_it(result, type(data))
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pyrogram/errors/rpc_error.py", line 93, in raise_it
+    raise getattr(
+pyrogram.errors.exceptions.bad_request_400.MessageEmpty: Telegram says: [400 MESSAGE_EMPTY] (caused by "messages.SendMessage") Pyrogram 2.3.68 thinks: The message sent is empty or contains invalid characters
+[24-Oct-25 08:15:09 AM - INFO] - handle_download() - Line 329: main - Downloading media from URL: https://t.me/c/2018320478/1747
+[24-Oct-25 08:15:12 AM - INFO] - handle_download() - Line 430: main - Downloaded media: /home/runner/workspace/downloads/1801/IIM P&C Sheet Solutions By K.K.pdf
+[24-Oct-25 08:15:12 AM - INFO] - send_media() - Line 271: helpers.utils - Uploading media: /home/runner/workspace/downloads/1801/IIM P&C Sheet Solutions By K.K.pdf (document)

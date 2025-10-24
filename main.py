@@ -429,45 +429,48 @@ async def handle_download(bot: Client, message: Message, post_url: str, user_cli
 
             LOGGER(__name__).info(f"Downloaded media: {media_path}")
 
-            media_type = (
-                "photo"
-                if chat_message.photo
-                else "video"
-                if chat_message.video
-                else "audio"
-                if chat_message.audio
-                else "document"
-            )
-            await send_media(
-                bot,
-                message,
-                media_path,
-                media_type,
-                parsed_caption,
-                progress_message,
-                start_time,
-                message.from_user.id,
-            )
+            try:
+                media_type = (
+                    "photo"
+                    if chat_message.photo
+                    else "video"
+                    if chat_message.video
+                    else "audio"
+                    if chat_message.audio
+                    else "document"
+                )
+                await send_media(
+                    bot,
+                    message,
+                    media_path,
+                    media_type,
+                    parsed_caption,
+                    progress_message,
+                    start_time,
+                    message.from_user.id,
+                )
 
-            cleanup_download(media_path)
-            await progress_message.delete()
+                await progress_message.delete()
 
-            # Only increment usage after successful download
-            if increment_usage:
-                db.increment_usage(message.from_user.id)
-                
-                # Show completion message with buttons for all free users
-                user_type = db.get_user_type(message.from_user.id)
-                if user_type == 'free':
-                    from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-                    upgrade_markup = InlineKeyboardMarkup([
-                        [InlineKeyboardButton("🎁 Watch Ad & Get 1 Download", callback_data="watch_ad_now")],
-                        [InlineKeyboardButton("💰 Upgrade to Premium", callback_data="upgrade_premium")]
-                    ])
-                    await message.reply(
-                        "✅ **Download complete**",
-                        reply_markup=upgrade_markup
-                    )
+                # Only increment usage after successful download
+                if increment_usage:
+                    db.increment_usage(message.from_user.id)
+                    
+                    # Show completion message with buttons for all free users
+                    user_type = db.get_user_type(message.from_user.id)
+                    if user_type == 'free':
+                        from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+                        upgrade_markup = InlineKeyboardMarkup([
+                            [InlineKeyboardButton("🎁 Watch Ad & Get 1 Download", callback_data="watch_ad_now")],
+                            [InlineKeyboardButton("💰 Upgrade to Premium", callback_data="upgrade_premium")]
+                        ])
+                        await message.reply(
+                            "✅ **Download complete**",
+                            reply_markup=upgrade_markup
+                        )
+            finally:
+                # CRITICAL: Always cleanup downloaded file, even if errors occur during upload
+                cleanup_download(media_path)
 
         elif chat_message.text or chat_message.caption:
             await message.reply(parsed_text or parsed_caption)
@@ -1426,7 +1429,8 @@ async def verify_dump_channel():
         LOGGER(__name__).error(f"  3. Bot has permission to post messages")
         LOGGER(__name__).error(f"Dump channel feature will be disabled until fixed")
 
-# Note: Dump channel verification is called from server.py after bot starts
+# Note: Periodic cleanup task is started from server.py when bot initializes
+# This ensures downloaded files are cleaned up every 30 minutes to prevent memory/disk leaks
 
 if __name__ == "__main__":
     try:
