@@ -2,7 +2,6 @@
 
 import os
 from time import time
-from PIL import Image
 from logger import LOGGER
 from typing import Optional
 from asyncio.subprocess import PIPE
@@ -28,21 +27,35 @@ from helpers.msg import (
     get_parsed_msg
 )
 
+# Try to import PIL for thumbnail processing (optional)
+try:
+    from PIL import Image as PILImage
+    PIL_AVAILABLE = True
+except ImportError:
+    PILImage = None
+    PIL_AVAILABLE = False
+    LOGGER(__name__).info("PIL not available - thumbnails will be skipped for better RAM efficiency")
+
 async def process_thumbnail(thumb_path, max_size_kb=200):
     """
-    Process thumbnail to meet Telegram requirements:
+    Process thumbnail to meet Telegram requirements (optional - requires PIL):
     - JPEG format
     - <= 200 KB
     - Max 320px width/height
+    
+    Returns False if PIL is not available or processing fails.
     """
+    if not PIL_AVAILABLE or PILImage is None:
+        return False
+    
     try:
-        with Image.open(thumb_path) as img:
+        with PILImage.open(thumb_path) as img:
             # Convert to RGB (remove alpha channel if present)
             if img.mode != 'RGB':
                 img = img.convert('RGB')
             
             # Resize to fit within 320x320 while maintaining aspect ratio
-            img.thumbnail((320, 320), Image.Resampling.LANCZOS)
+            img.thumbnail((320, 320), PILImage.Resampling.LANCZOS)
             
             # Save with compression, iteratively reduce quality if needed
             quality = 95
@@ -67,12 +80,8 @@ async def process_thumbnail(thumb_path, max_size_kb=200):
         LOGGER(__name__).error(f"Error processing thumbnail: {e}")
         return False
 
-# Progress bar template
-PROGRESS_BAR = """
-Percentage: {percentage:.2f}% | {current}/{total}
-Speed: {speed}/s
-Estimated Time Left: {est_time} seconds
-"""
+# Simplified progress bar template (reduced RAM usage)
+PROGRESS_BAR = "{percentage:.0f}% | {speed}/s"
 
 async def cmd_exec(cmd, shell=False):
     if shell:
@@ -338,9 +347,9 @@ async def send_media(
                 thumb = None
         
         # Get video dimensions
-        if thumb and thumb != "none" and os.path.exists(str(thumb)):
+        if thumb and thumb != "none" and os.path.exists(str(thumb)) and PIL_AVAILABLE and PILImage:
             try:
-                with Image.open(thumb) as img:
+                with PILImage.open(thumb) as img:
                     width, height = img.size
             except:
                 width = 480
