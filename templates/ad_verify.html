@@ -410,7 +410,7 @@
             
             <div class="timer-container" id="timerContainer1" style="display: none;">
                 <div class="timer-label">Auto-advancing in...</div>
-                <div class="timer" id="timer1">15</div>
+                <div class="timer" id="timer1">10</div>
             </div>
             
             <div class="ad-box" id="adBox1" style="display: none;">
@@ -473,7 +473,7 @@
             
             <div class="timer-container" id="timerContainer2" style="display: none;">
                 <div class="timer-label">Generating code in...</div>
-                <div class="timer" id="timer2">15</div>
+                <div class="timer" id="timer2">10</div>
             </div>
             
             <div class="ad-box">
@@ -515,69 +515,6 @@
                             };
                         </script>
                         <script type="text/javascript" src="//www.highperformanceformat.com/9d2b414beda94767b13034f0cb94f7c4/invoke.js"></script>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Page 3 -->
-        <div class="page" id="page3">
-            <div class="progress-indicator">
-                <div class="progress-dot active"></div>
-                <div class="progress-dot active"></div>
-                <div class="progress-dot active"></div>
-            </div>
-            
-            <div class="verification-notice">
-                ✨ Step 3 of 3: Final Verification
-            </div>
-            
-            <button class="start-btn" id="openAdsBtn3" style="display: none;">🌐 OPEN FINAL ADS</button>
-            
-            <div class="timer-container" id="timerContainer3" style="display: none;">
-                <div class="timer-label">Generating code in...</div>
-                <div class="timer" id="timer3">15</div>
-            </div>
-            
-            <div class="ad-box">
-                <div class="ad-box-header">📺 Advertisement Zone</div>
-                
-                <div class="ad-notice">
-                    <h3>🌐 Final Ads in Chrome Browser!</h3>
-                    <p>Almost done! Check Chrome for the final ads</p>
-                </div>
-                
-                <!-- Banner Ad 5 - Network Ad -->
-                <div class="ad-container">
-                    <div class="ad-label">Advertisement</div>
-                    <div style="text-align: center; padding: 10px; background: #f5f5f5;">
-                        <script type="text/javascript">
-                            atOptions = {
-                                'key' : '9d2b414beda94767b13034f0cb94f7c4',
-                                'format' : 'iframe',
-                                'height' : 60,
-                                'width' : 468,
-                                'params' : {}
-                            };
-                        </script>
-                        <script type="text/javascript" src="//www.highperformanceformat.com/9d2b414beda94767b13034f0cb94f7c4/invoke.js"></script>
-                    </div>
-                </div>
-                
-                <!-- Banner Ad 6 - Network Ad -->
-                <div class="ad-container">
-                    <div class="ad-label">Sponsored</div>
-                    <div style="text-align: center; padding: 10px; background: #f5f5f5;">
-                        <script type="text/javascript">
-                            atOptions = {
-                                'key' : '9d2b414beda94767b13034f0cb94f7c4',
-                                'format' : 'iframe',
-                                'height' : 60,
-                                'width' : 468,
-                                'params' : {}
-                            };
-                        </script>
-                        <script type="text/javascript" src="//www.highperformageformat.com/9d2b414beda94767b13034f0cb94f7c4/invoke.js"></script>
                     </div>
                 </div>
             </div>
@@ -689,7 +626,7 @@
         });
 
         function startPage1Timer() {
-            let timer1 = 15;
+            let timer1 = 10;
             const timer1Interval = setInterval(() => {
                 timer1--;
                 document.getElementById('timer1').textContent = timer1;
@@ -725,7 +662,7 @@
         });
 
         function startPage2Timer() {
-            let timer2 = 15;
+            let timer2 = 10;
             const timer2Interval = setInterval(() => {
                 timer2--;
                 document.getElementById('timer2').textContent = timer2;
@@ -733,42 +670,6 @@
                 if (timer2 <= 0) {
                     clearInterval(timer2Interval);
                     advanceToPage3();
-                }
-            }, 1000);
-        }
-
-        function advanceToPage3() {
-            // Transition to page 3
-            document.getElementById('page2').classList.remove('active');
-            document.getElementById('page3').classList.add('active');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            
-            // Show the button to open ads (requires user gesture in Telegram)
-            document.getElementById('openAdsBtn3').style.display = 'block';
-        }
-
-        // Page 3: Open final ads button click
-        document.getElementById('openAdsBtn3').addEventListener('click', () => {
-            // Open third smartlink in Chrome using intent (Android) or Chrome scheme (iOS)
-            openInExternalBrowser(smartlink3);
-            
-            // Hide button, show timer
-            document.getElementById('openAdsBtn3').style.display = 'none';
-            document.getElementById('timerContainer3').style.display = 'block';
-            
-            // Start page 3 timer
-            startPage3Timer();
-        });
-
-        function startPage3Timer() {
-            let timer3 = 15;
-            const timer3Interval = setInterval(() => {
-                timer3--;
-                document.getElementById('timer3').textContent = timer3;
-                
-                if (timer3 <= 0) {
-                    clearInterval(timer3Interval);
-                    fetchVerificationCode();
                 }
             }, 1000);
         }
