@@ -396,24 +396,19 @@ async def handle_download(bot: Client, message: Message, post_url: str, user_cli
                 if not success:
                     LOGGER(__name__).error(f"Failed to increment usage for user {message.from_user.id} after media group download")
                 
-                # Show upgrade message for free users
+                # Show completion message with buttons for all free users
                 user_type = db.get_user_type(message.from_user.id)
                 if user_type == 'free':
-                    user_data = db.get_user(message.from_user.id)
-                    ad_downloads = user_data.get('ad_downloads', 0) if user_data else 0
+                    from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+                    upgrade_keyboard = InlineKeyboardMarkup([
+                        [InlineKeyboardButton("🎁 Watch Ad & Get 1 Download", callback_data="watch_ad_now")],
+                        [InlineKeyboardButton("💰 Upgrade to Premium", callback_data="upgrade_premium")]
+                    ])
                     
-                    # Only show upgrade prompt if they don't have ad downloads remaining
-                    if ad_downloads == 0:
-                        from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-                        upgrade_keyboard = InlineKeyboardMarkup([
-                            [InlineKeyboardButton("🎁 Watch Ad & Get 1 Download", callback_data="watch_ad_now")],
-                            [InlineKeyboardButton("💰 Upgrade to Premium", callback_data="upgrade_premium")]
-                        ])
-                        
-                        await message.reply(
-                            "✅ **Download complete**",
-                            reply_markup=upgrade_keyboard
-                        )
+                    await message.reply(
+                        "✅ **Download complete**",
+                        reply_markup=upgrade_keyboard
+                    )
             
             return
 
@@ -461,22 +456,18 @@ async def handle_download(bot: Client, message: Message, post_url: str, user_cli
             if increment_usage:
                 db.increment_usage(message.from_user.id)
                 
-                # Show upgrade buttons for free users
+                # Show completion message with buttons for all free users
                 user_type = db.get_user_type(message.from_user.id)
                 if user_type == 'free':
-                    user_data = db.get_user(message.from_user.id)
-                    ad_downloads = user_data.get('ad_downloads', 0) if user_data else 0
-                    
-                    # Only show buttons if they don't have ad downloads remaining
-                    if ad_downloads == 0:
-                        upgrade_markup = InlineKeyboardMarkup([
-                            [InlineKeyboardButton("🎁 Watch Ad & Get 1 Download", callback_data="watch_ad_now")],
-                            [InlineKeyboardButton("💰 Upgrade to Premium", callback_data="upgrade_premium")]
-                        ])
-                        await message.reply(
-                            "✅ **Download complete**",
-                            reply_markup=upgrade_markup
-                        )
+                    from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+                    upgrade_markup = InlineKeyboardMarkup([
+                        [InlineKeyboardButton("🎁 Watch Ad & Get 1 Download", callback_data="watch_ad_now")],
+                        [InlineKeyboardButton("💰 Upgrade to Premium", callback_data="upgrade_premium")]
+                    ])
+                    await message.reply(
+                        "✅ **Download complete**",
+                        reply_markup=upgrade_markup
+                    )
 
         elif chat_message.text or chat_message.caption:
             await message.reply(parsed_text or parsed_caption)

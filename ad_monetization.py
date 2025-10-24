@@ -105,7 +105,7 @@ class AdMonetization:
         db.add_ad_downloads(user_id, PREMIUM_DOWNLOADS)
         
         LOGGER(__name__).info(f"User {user_id} successfully verified code {code}, granted {PREMIUM_DOWNLOADS} ad downloads")
-        return True, f"✅ **Verification successful!**\n\nYou now have **{PREMIUM_DOWNLOADS} free downloads** from watching ads!"
+        return True, f"✅ **Verification successful!**\n\nYou now have **{PREMIUM_DOWNLOADS} free download(s)**!"
     
     def get_time_left(self, code: str) -> int:
         """Get minutes left for verification code"""

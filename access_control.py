@@ -105,20 +105,6 @@ def check_download_limit(func):
             asyncio.create_task(delete_after_delay())
             return
 
-        # Show remaining downloads for free users with premium promotion
-        user_type = db.get_user_type(user_id)
-        if user_type == 'free' and message_text:
-            sent_msg = await message.reply(message_text)
-            
-            async def delete_after_delay():
-                try:
-                    await asyncio.sleep(10)
-                    await sent_msg.delete()
-                except Exception as e:
-                    LOGGER(__name__).debug(f"Could not delete message: {e}")
-            
-            asyncio.create_task(delete_after_delay())
-
         return await func(client, message)
     return wrapper
 

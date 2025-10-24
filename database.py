@@ -396,41 +396,19 @@ class DatabaseManager:
         if ad_downloads > 0:
             if ad_downloads < count:
                 # Not enough ad downloads for this media group
-                quota_message = (
-                    f"❌ **Insufficient ad downloads**\n\n"
-                    f"📊 **You have:** {ad_downloads} ad download(s)\n"
-                    f"📊 **You need:** {count} download(s) for this media group\n\n"
-                    "💎 **Get More Downloads:**\n\n"
-                    "🎁 **Watch more ads:** Use `/getpremium` to get 1 more download!\n"
-                    "💰 **Upgrade to Premium:** Use `/upgrade` - $1/month for unlimited downloads!"
-                )
+                quota_message = f"❌ **Insufficient ad downloads**\n\n📊 You have {ad_downloads} ad download(s) but need {count} for this media group."
                 return False, quota_message
             
-            remaining_ad_downloads = ad_downloads
-            success_message = (
-                f"✅ **Download successful!**\n\n"
-                f"📥 **Ad downloads remaining:** {remaining_ad_downloads - count}\n\n"
-                "💎 **Want more free downloads?**\n"
-                "🎁 Use `/getpremium` - Watch ads and get 1 more download!\n"
-                "💰 Or upgrade to Premium: `/upgrade` - Unlimited downloads!"
-            )
-            return True, success_message
+            # User has enough ad downloads - allow download
+            return True, ""
 
         daily_usage = self.get_daily_usage(user_id)
         if daily_usage + count > 1:
-            from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
             quota_message = f"📊 **Daily limit reached**"
             return False, quota_message
 
-        completed_message = (
-            f"✅ **Download complete!**\n\n"
-            f"📥 **Downloads completed today:** {daily_usage + count}/1\n\n"
-            "💎 **Want unlimited downloads?**\n\n"
-            "🎁 **Get FREE Downloads:** Use `/getpremium` - Watch ads for 1 more download!\n"
-            "💰 **Or Pay $1/month:** Use `/upgrade` - Unlimited downloads forever!\n\n"
-            "Both give you unlimited downloads + batch feature!"
-        )
-        return True, completed_message
+        # Return True with empty message - completion message with buttons will be shown by main.py
+        return True, ""
 
     def get_all_users(self) -> List[int]:
         """Get all user IDs"""
