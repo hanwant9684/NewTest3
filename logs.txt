@@ -1,4 +1,68 @@
-[24-Oct-25 01:50:50 AM - INFO] - __init__() - Line 31: cache - Cache initialized: max_size=200, ttl=180s
-[24-Oct-25 01:50:52 AM - INFO] - __init__() - Line 45: database - Successfully connected to MongoDB!
-[24-Oct-25 01:50:54 AM - INFO] - init_database() - Line 77: database - Database indexes created successfully
-[24-Oct-25 01:50:54 AM - INFO] - __init__() - Line 27: ad_monetization - Monetag ad network configured with 0 ad slot(s)
+[24-Oct-25 03:48:16 AM - INFO] - __init__() - Line 31: cache - Cache initialized: max_size=200, ttl=180s
+[24-Oct-25 03:48:20 AM - INFO] - __init__() - Line 45: database - Successfully connected to MongoDB!
+[24-Oct-25 03:48:22 AM - INFO] - init_database() - Line 77: database - Database indexes created successfully
+[24-Oct-25 03:48:22 AM - INFO] - __init__() - Line 27: ad_monetization - Monetag ad network configured with 0 ad slot(s)
+[24-Oct-25 03:48:22 AM - INFO] - _log() - Line 97: werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.31.101.194:5000
+[24-Oct-25 03:48:22 AM - INFO] - _log() - Line 97: werkzeug - [33mPress CTRL+C to quit[0m
+[24-Oct-25 03:48:23 AM - INFO] - __init__() - Line 37: queue_manager - Queue Manager initialized: 10 concurrent, 50 max queue
+[24-Oct-25 03:48:23 AM - INFO] - start_processor() - Line 43: queue_manager - Queue processor started
+[24-Oct-25 03:48:23 AM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
+[24-Oct-25 03:48:23 AM - INFO] - _init_queue() - Line 1403: main - Download queue processor initialized
+[24-Oct-25 03:48:23 AM - INFO] - start_bot() - Line 108: __main__ - Starting Telegram bot from server.py (long polling)
+[24-Oct-25 03:48:29 AM - INFO] - _log() - Line 97: werkzeug - 172.31.101.194 - - [24/Oct/2025 03:48:29] "GET / HTTP/1.1" 200 -
+[24-Oct-25 03:48:29 AM - INFO] - start_bot() - Line 115: __main__ - Bot started successfully, waiting for updates...
+[24-Oct-25 03:48:29 AM - INFO] - start_cleanup_task() - Line 191: phone_auth - Started auth session cleanup task
+[24-Oct-25 03:48:29 AM - INFO] - start_bot() - Line 123: __main__ - Started periodic download cleanup task
+[24-Oct-25 03:48:30 AM - INFO] - verify_dump_channel() - Line 1428: main - ✅ Dump channel verified: Dump (ID: -1003042213082)
+[24-Oct-25 03:48:30 AM - INFO] - verify_dump_channel() - Line 1429: main - All downloaded media will be forwarded to dump channel
+[24-Oct-25 03:48:35 AM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
+[24-Oct-25 03:48:42 AM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
+[24-Oct-25 03:49:07 AM - INFO] - get_app_url() - Line 132: config - Detected Replit domain: https://69325945-1d95-42c5-8e7e-de693f239b9f-00-1c75pk0uyp3i6.kirk.replit.dev
+[24-Oct-25 03:49:07 AM - INFO] - create_ad_session() - Line 42: ad_monetization - Created ad session b0962ba96180dd4f83007268476278ae for user 7481690649
+[24-Oct-25 03:49:07 AM - INFO] - generate_ad_link() - Line 139: ad_monetization - Generated ad session b0962ba96180dd4f83007268476278ae for user 7481690649
+[24-Oct-25 03:49:07 AM - INFO] - callback_handler() - Line 1332: main - User 7481690649 requested ad-based download via button
+[24-Oct-25 03:49:12 AM - INFO] - _log() - Line 97: werkzeug - 172.31.101.194 - - [24/Oct/2025 03:49:12] "GET /watch-ad?session=b0962ba96180dd4f83007268476278ae HTTP/1.1" 200 -
+[24-Oct-25 03:49:16 AM - INFO] - _log() - Line 97: werkzeug - 172.31.101.194 - - [24/Oct/2025 03:49:16] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[24-Oct-25 03:49:59 AM - INFO] - _log() - Line 97: werkzeug - 172.31.101.194 - - [24/Oct/2025 03:49:59] "GET / HTTP/1.1" 200 -
+[24-Oct-25 03:50:17 AM - INFO] - _generate_verification_code() - Line 83: ad_monetization - Generated verification code D7B69898 for user 7481690649
+[24-Oct-25 03:50:18 AM - INFO] - verify_ad_completion() - Line 75: ad_monetization - User 7481690649 completed ad session b0962ba96180dd4f83007268476278ae, generated code D7B69898
+[24-Oct-25 03:50:18 AM - INFO] - _log() - Line 97: werkzeug - 172.31.101.194 - - [24/Oct/2025 03:50:18] "GET /verify-ad?session=b0962ba96180dd4f83007268476278ae HTTP/1.1" 200 -
+[24-Oct-25 03:50:25 AM - INFO] - verify_premium_command() - Line 1089: main - verify_premium_command triggered by user 7481690649
+[24-Oct-25 03:50:26 AM - INFO] - add_ad_downloads() - Line 718: database - Added 1 ad downloads to user 7481690649
+[24-Oct-25 03:50:26 AM - INFO] - verify_code() - Line 107: ad_monetization - User 7481690649 successfully verified code D7B69898, granted 1 ad downloads
+[24-Oct-25 03:50:26 AM - INFO] - verify_premium_command() - Line 1105: main - User 7481690649 successfully verified ad code and received downloads
+[24-Oct-25 03:50:42 AM - ERROR] - wrapper() - Line 208: access_control - Error checking channel membership: Telegram says: [400 MESSAGE_EMPTY] (caused by "messages.SendMessage") Pyrogram 2.3.68 thinks: The message sent is empty or contains invalid characters
+[24-Oct-25 03:50:43 AM - INFO] - handle_download() - Line 329: main - Downloading media from URL: https://t.me/c/2922670555/739
+[24-Oct-25 03:50:47 AM - INFO] - handle_download() - Line 435: main - Downloaded media: /home/runner/workspace/downloads/1752/(RPSC_ASSIGNMENT_&_ASSIGNMENT__20240213151116.pdf
+[24-Oct-25 03:50:47 AM - INFO] - send_media() - Line 271: helpers.utils - Uploading media: /home/runner/workspace/downloads/1752/(RPSC_ASSIGNMENT_&_ASSIGNMENT__20240213151116.pdf (document)
+[24-Oct-25 03:50:55 AM - INFO] - send_to_dump_channel() - Line 252: helpers.utils - Sent document to dump channel for user 7481690649
+[24-Oct-25 03:50:55 AM - INFO] - cleanup_download() - Line 18: helpers.files - Cleaning Download: /home/runner/workspace/downloads/1752/(RPSC_ASSIGNMENT_&_ASSIGNMENT__20240213151116.pdf
+[24-Oct-25 03:50:55 AM - INFO] - increment_usage() - Line 348: database - User 7481690649 used 1 ad download(s), 0 remaining
+[24-Oct-25 03:50:56 AM - ERROR] - handle_download() - Line 491: main - cannot access local variable 'InlineKeyboardMarkup' where it is not associated with a value
+[24-Oct-25 03:50:56 AM - INFO] - _execute_download() - Line 142: queue_manager - Download completed for user 7481690649. Active: 0
+[24-Oct-25 03:51:22 AM - INFO] - get_app_url() - Line 132: config - Detected Replit domain: https://69325945-1d95-42c5-8e7e-de693f239b9f-00-1c75pk0uyp3i6.kirk.replit.dev
+[24-Oct-25 03:51:22 AM - INFO] - create_ad_session() - Line 42: ad_monetization - Created ad session 182c13f326f031822a2b8c14f07bc703 for user 7481690649
+[24-Oct-25 03:51:22 AM - INFO] - generate_ad_link() - Line 139: ad_monetization - Generated ad session 182c13f326f031822a2b8c14f07bc703 for user 7481690649
+[24-Oct-25 03:51:23 AM - INFO] - callback_handler() - Line 1332: main - User 7481690649 requested ad-based download via button
+[24-Oct-25 03:51:26 AM - INFO] - _log() - Line 97: werkzeug - 172.31.101.194 - - [24/Oct/2025 03:51:26] "GET /watch-ad?session=182c13f326f031822a2b8c14f07bc703 HTTP/1.1" 200 -
+[24-Oct-25 03:51:30 AM - INFO] - _log() - Line 97: werkzeug - 172.31.101.194 - - [24/Oct/2025 03:51:30] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[24-Oct-25 03:52:26 AM - INFO] - _generate_verification_code() - Line 83: ad_monetization - Generated verification code BA5D0B38 for user 7481690649
+[24-Oct-25 03:52:26 AM - INFO] - verify_ad_completion() - Line 75: ad_monetization - User 7481690649 completed ad session 182c13f326f031822a2b8c14f07bc703, generated code BA5D0B38
+[24-Oct-25 03:52:26 AM - INFO] - _log() - Line 97: werkzeug - 172.31.101.194 - - [24/Oct/2025 03:52:26] "GET /verify-ad?session=182c13f326f031822a2b8c14f07bc703 HTTP/1.1" 200 -
+[24-Oct-25 03:52:34 AM - INFO] - verify_premium_command() - Line 1089: main - verify_premium_command triggered by user 7481690649
+[24-Oct-25 03:52:35 AM - INFO] - add_ad_downloads() - Line 718: database - Added 1 ad downloads to user 7481690649
+[24-Oct-25 03:52:35 AM - INFO] - verify_code() - Line 107: ad_monetization - User 7481690649 successfully verified code BA5D0B38, granted 1 ad downloads
+[24-Oct-25 03:52:36 AM - INFO] - verify_premium_command() - Line 1105: main - User 7481690649 successfully verified ad code and received downloads
+[24-Oct-25 03:52:45 AM - ERROR] - wrapper() - Line 208: access_control - Error checking channel membership: Telegram says: [400 MESSAGE_EMPTY] (caused by "messages.SendMessage") Pyrogram 2.3.68 thinks: The message sent is empty or contains invalid characters
+[24-Oct-25 03:52:46 AM - INFO] - handle_download() - Line 329: main - Downloading media from URL: https://t.me/c/2922670555/737
+[24-Oct-25 03:52:49 AM - INFO] - handle_download() - Line 435: main - Downloaded media: /home/runner/workspace/downloads/1764/(RPSC_ASSIGNMENT_&_ASSIGNMENT__20240213151116.pdf
+[24-Oct-25 03:52:49 AM - INFO] - send_media() - Line 271: helpers.utils - Uploading media: /home/runner/workspace/downloads/1764/(RPSC_ASSIGNMENT_&_ASSIGNMENT__20240213151116.pdf (document)
+[24-Oct-25 03:52:56 AM - INFO] - send_to_dump_channel() - Line 252: helpers.utils - Sent document to dump channel for user 7481690649
+[24-Oct-25 03:52:56 AM - INFO] - cleanup_download() - Line 18: helpers.files - Cleaning Download: /home/runner/workspace/downloads/1764/(RPSC_ASSIGNMENT_&_ASSIGNMENT__20240213151116.pdf
+[24-Oct-25 03:52:56 AM - INFO] - increment_usage() - Line 348: database - User 7481690649 used 1 ad download(s), 0 remaining
+[24-Oct-25 03:52:57 AM - ERROR] - handle_download() - Line 491: main - cannot access local variable 'InlineKeyboardMarkup' where it is not associated with a value
+[24-Oct-25 03:52:57 AM - INFO] - _execute_download() - Line 142: queue_manager - Download completed for user 7481690649. Active: 0
+[24-Oct-25 03:53:12 AM - INFO] - _log() - Line 97: werkzeug - 172.31.101.194 - - [24/Oct/2025 03:53:12] "GET / HTTP/1.1" 200 -

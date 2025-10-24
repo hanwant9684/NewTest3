@@ -346,6 +346,8 @@ class DatabaseManager:
                 
                 if result.modified_count > 0:
                     LOGGER(__name__).info(f"User {user_id} used {count} ad download(s), {ad_downloads - count} remaining")
+                    # CRITICAL: Clear cache to prevent stale ad_downloads from being reused
+                    self.cache.delete(f"user_{user_id}")
                     return True
                 else:
                     # Race condition: another process might have used the ad downloads
@@ -417,23 +419,7 @@ class DatabaseManager:
         daily_usage = self.get_daily_usage(user_id)
         if daily_usage + count > 1:
             from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-            quota_message = (
-                f"📊 **Daily limit reached ({daily_usage}/1 files used)**\n\n"
-                f"❌ **Cannot download:** This {'media group has ' + str(count) + ' files' if count > 1 else 'file'} would exceed your daily limit\n\n"
-                "💎 **Get More Downloads:**\n\n"
-                "🎁 **FREE Option - Watch Ads:**\n"
-                "   • Click button below or use `/getpremium` command\n"
-                "   • Watch quick ads and get 1 more download!\n"
-                "   • No waiting, instant access\n\n"
-                "💰 **Paid Option - $1/month:**\n"
-                "   • Use `/upgrade` to see payment options\n"
-                "   • Unlimited downloads forever\n\n"
-                "✅ **Premium Benefits:**\n"
-                "   • Unlimited downloads per day\n"
-                "   • Batch download support (/bdl)\n"
-                "   • Download up to 20 posts at once\n"
-                "   • Priority support"
-            )
+            quota_message = f"📊 **Daily limit reached**"
             return False, quota_message
 
         completed_message = (

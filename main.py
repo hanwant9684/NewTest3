@@ -406,26 +406,14 @@ async def handle_download(bot: Client, message: Message, post_url: str, user_cli
                     if ad_downloads == 0:
                         from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
                         upgrade_keyboard = InlineKeyboardMarkup([
-                            [InlineKeyboardButton("🎁 Get FREE Downloads", callback_data="watch_ad_now")],
-                            [InlineKeyboardButton("💰 Upgrade to Premium - $1/month", callback_data="upgrade_premium")]
+                            [InlineKeyboardButton("🎁 Watch Ad & Get 1 Download", callback_data="watch_ad_now")],
+                            [InlineKeyboardButton("💰 Upgrade to Premium", callback_data="upgrade_premium")]
                         ])
                         
-                        daily_usage = db.get_daily_usage(message.from_user.id)
-                        sent_msg = await message.reply(
-                            f"✅ **{files_sent} files downloaded!**\n\n"
-                            f"📊 **Daily downloads used:** {daily_usage}/1\n\n"
-                            "💎 **Want unlimited downloads?**",
+                        await message.reply(
+                            "✅ **Download complete**",
                             reply_markup=upgrade_keyboard
                         )
-                        
-                        async def delete_after_delay():
-                            try:
-                                await asyncio.sleep(15)
-                                await sent_msg.delete()
-                            except Exception as e:
-                                LOGGER(__name__).debug(f"Could not delete upgrade message: {e}")
-                        
-                        asyncio.create_task(delete_after_delay())
             
             return
 
@@ -473,24 +461,22 @@ async def handle_download(bot: Client, message: Message, post_url: str, user_cli
             if increment_usage:
                 db.increment_usage(message.from_user.id)
                 
-                # Show upgrade buttons for free users (but not if they have ad-based premium)
+                # Show upgrade buttons for free users
                 user_type = db.get_user_type(message.from_user.id)
-                user_data = db.get_user(message.from_user.id)
-                premium_source = user_data.get('premium_source') if user_data else None
-                
-                # Show buttons only if: user is free AND doesn't have ad-based premium active
-                if user_type == 'free' and premium_source != 'ads':
-                    upgrade_markup = InlineKeyboardMarkup([
-                        [
-                            InlineKeyboardButton("🎁 FREE Premium (Ads)", callback_data="get_free_premium"),
-                            InlineKeyboardButton("💰 $1 Premium", callback_data="get_paid_premium")
-                        ]
-                    ])
-                    await message.reply(
-                        "✅ **Download Complete!**\n\n"
-                        "💎 Want unlimited downloads? Get premium now:",
-                        reply_markup=upgrade_markup
-                    )
+                if user_type == 'free':
+                    user_data = db.get_user(message.from_user.id)
+                    ad_downloads = user_data.get('ad_downloads', 0) if user_data else 0
+                    
+                    # Only show buttons if they don't have ad downloads remaining
+                    if ad_downloads == 0:
+                        upgrade_markup = InlineKeyboardMarkup([
+                            [InlineKeyboardButton("🎁 Watch Ad & Get 1 Download", callback_data="watch_ad_now")],
+                            [InlineKeyboardButton("💰 Upgrade to Premium", callback_data="upgrade_premium")]
+                        ])
+                        await message.reply(
+                            "✅ **Download complete**",
+                            reply_markup=upgrade_markup
+                        )
 
         elif chat_message.text or chat_message.caption:
             await message.reply(parsed_text or parsed_caption)
@@ -1079,8 +1065,18 @@ async def get_premium_command(client: Client, message: Message):
             [InlineKeyboardButton("🎁 Get 1 FREE Download", url=ad_url)]
         ])
         
-        await message.reply(premium_text, reply_markup=markup, disable_web_page_preview=True)
+        sent_msg = await message.reply(premium_text, reply_markup=markup, disable_web_page_preview=True)
         LOGGER(__name__).info(f"User {message.from_user.id} requested ad-based premium")
+        
+        # Auto-delete after 60 seconds
+        async def delete_after_delay():
+            try:
+                await asyncio.sleep(60)
+                await sent_msg.delete()
+            except Exception as e:
+                LOGGER(__name__).debug(f"Could not delete getpremium message: {e}")
+        
+        asyncio.create_task(delete_after_delay())
         
     except Exception as e:
         await message.reply(f"❌ **Error generating premium link:** {str(e)}")

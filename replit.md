@@ -53,6 +53,49 @@ The bot interacts with users primarily via Telegram commands. Ad verification us
 
 ## Recent Changes
 
+### Ad Download System Bug Fixes (October 24, 2025)
+Fixed critical bugs in the ad download system and simplified the user experience:
+
+**Bug Fixes:**
+1. **Multiple Downloads per Ad Bug (CRITICAL):**
+   - **Problem:** Users could download unlimited files after watching just 1 ad due to stale cache values
+   - **Root Cause:** `increment_usage()` decremented ad_downloads in MongoDB but didn't clear the cached user data, allowing `can_download()` to read stale values for ~3 minutes
+   - **Solution:** Added `self.cache.delete(f"user_{user_id}")` immediately after decrementing ad_downloads to invalidate the cache
+   - **Result:** Now enforces strict 1 ad = 1 download rule
+
+2. **Too Many Download Messages:**
+   - **Problem:** Users received multiple messages during downloads: queue position, download start, progress updates, and completion
+   - **Solution:** Removed all intermediate messages from `queue_manager.py`:
+     - Removed queue position notifications
+     - Removed "Download started!" messages
+     - Removed "Your download is starting now!" messages
+   - **Result:** Users now see only the final completion message with action buttons
+
+3. **Verbose Completion Messages:**
+   - **Problem:** Completion messages showed too much information (daily usage, file counts, multiple lines of text)
+   - **Solution:** Simplified to clean, minimal format:
+     - Just "✅ Download complete"
+     - Two clean inline buttons: "🎁 Watch Ad & Get 1 Download" and "💰 Upgrade to Premium"
+   - **Result:** Cleaner, more professional user experience
+
+**Technical Details:**
+- Modified `database.py` line 353: Added cache invalidation after ad_downloads decrement
+- Modified `queue_manager.py` lines 110-111, 117-119, 164-169: Commented out all intermediate messages
+- Modified `main.py` lines 416-419, 491-494: Simplified completion messages for both single files and media groups
+
+**Files Modified:**
+- `database.py` - Cache invalidation fix in `increment_usage()`
+- `queue_manager.py` - Removed queue and start messages
+- `main.py` - Simplified completion messages
+
+**Benefits:**
+- Prevents ad download exploitation (critical security fix)
+- Cleaner chat experience with minimal messages
+- Consistent user experience across all download types
+- Easier to understand call-to-action buttons
+
+**Status:** ✅ Implemented, architect-reviewed, and deployed
+
 ### Memory Optimization for Render Deployment (October 23, 2025)
 Optimized the bot to work within Render's 512MB RAM limit to prevent out-of-memory crashes:
 

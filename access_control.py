@@ -92,7 +92,17 @@ def check_download_limit(func):
                 [InlineKeyboardButton("🎁 Watch Ad & Get 1 Download", callback_data="watch_ad_now")],
                 [InlineKeyboardButton("💰 Upgrade to Premium", callback_data="upgrade_premium")]
             ])
-            await message.reply(message_text, reply_markup=keyboard)
+            sent_msg = await message.reply(message_text, reply_markup=keyboard)
+            
+            # Auto-delete after 30 seconds
+            async def delete_after_delay():
+                try:
+                    await asyncio.sleep(30)
+                    await sent_msg.delete()
+                except Exception as e:
+                    LOGGER(__name__).debug(f"Could not delete daily limit message: {e}")
+            
+            asyncio.create_task(delete_after_delay())
             return
 
         # Show remaining downloads for free users with premium promotion

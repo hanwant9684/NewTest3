@@ -104,20 +104,16 @@ class DownloadQueueManager:
                 position = self.get_queue_position(user_id)
                 premium_badge = "👑 **PREMIUM**" if is_premium else "🆓 **FREE**"
                 
-                return True, (
-                    f"⏳ **Download added to queue!**\n\n"
-                    f"{premium_badge}\n"
-                    f"📍 **Your Position:** #{position}/{len(self.waiting_queue)}\n"
-                    f"🔄 **Active Downloads:** {len(self.active_downloads)}/{self.max_concurrent}\n\n"
-                    f"💡 You'll be notified when your download starts!"
-                )
+                # Don't send queue message - only show completion message
+                return True, None
             else:
                 self.active_downloads.add(user_id)
                 task = asyncio.create_task(self._execute_download(user_id, download_coro, message))
                 self.active_tasks[user_id] = task
                 
-                status_msg = f"✅ **Download started!**\n\n🔄 **Active Downloads:** {len(self.active_downloads)}/{self.max_concurrent}"
-                asyncio.create_task(self._send_auto_delete_message(message, status_msg, 10))
+                # Don't send download start message - only show completion message
+                # status_msg = f"✅ **Download started!**\n\n🔄 **Active Downloads:** {len(self.active_downloads)}/{self.max_concurrent}"
+                # asyncio.create_task(self._send_auto_delete_message(message, status_msg, 10))
                 
                 return True, None
     
@@ -162,11 +158,12 @@ class DownloadQueueManager:
                         
                         self.active_downloads.add(user_id)
                         
-                        try:
-                            status_msg = f"🚀 **Your download is starting now!**\n\n📥 Downloading: `{queue_item.post_url}`"
-                            asyncio.create_task(self._send_auto_delete_message(queue_item.message, status_msg, 10))
-                        except:
-                            pass
+                        # Don't send download start message - only show completion message
+                        # try:
+                        #     status_msg = f"🚀 **Your download is starting now!**\n\n📥 Downloading: `{queue_item.post_url}`"
+                        #     asyncio.create_task(self._send_auto_delete_message(queue_item.message, status_msg, 10))
+                        # except:
+                        #     pass
                         
                         task = asyncio.create_task(
                             self._execute_download(user_id, queue_item.download_coro, queue_item.message)
