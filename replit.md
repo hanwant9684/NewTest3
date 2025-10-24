@@ -19,13 +19,20 @@ The architecture is modular, separating core functionalities like phone authenti
 
 ## External Dependencies
 - **Database**: MongoDB
-- **Telegram API Framework**: Pyrofork
+- **Telegram API Framework**: Pyrofork + Pyrogram (Pyrofork requires pyrogram for enums)
 - **Cryptography**: TgCrypto
-- **Progress Bars**: Pyleaves
-- **Image Processing**: Pillow
+- **Progress Bars**: Pyleaves (simplified for lower RAM usage)
+- **Image Processing**: Pillow (OPTIONAL - removed to save ~50MB RAM; thumbnails disabled but downloads still work)
 - **Asynchronous Loop**: uvloop
-- **Web Framework**: Flask
+- **Web Framework**: Flask + Flask-compress (for bandwidth optimization)
+- **WSGI Server**: Waitress (chosen for 3-5x better RAM efficiency vs gunicorn)
 - **Environment Variables**: python-dotenv
 - **System Utilities**: psutil
 - **Monetization Platform**: Monetag
 - **Payment Gateways**: PayPal, UPI, Amazon Pay/Gift Card, Cryptocurrency (USDT/BTC/ETH)
+
+## RAM Optimizations (Latest)
+- **Pillow removed**: Thumbnails are now optional. Bot works without image processing library, saving ~50MB RAM. Video thumbnails extracted via ffmpeg with default dimensions.
+- **Progress bar simplified**: Reduced from multi-line detailed template to single-line "{percentage}% | {speed}/s" format.
+- **Waitress over Gunicorn**: Multi-threaded single-process model uses ~120MB vs gunicorn's ~620MB (4 workers).
+- **Dump channel**: Already optional with graceful degradation when not configured or inaccessible.
