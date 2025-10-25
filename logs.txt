@@ -1,26 +1,27 @@
-[25-Oct-25 12:11:31 PM - INFO] - __init__() - Line 31: cache - Cache initialized: max_size=50, ttl=120s
-[25-Oct-25 12:11:33 PM - INFO] - __init__() - Line 46: database - Successfully connected to MongoDB!
-[25-Oct-25 12:11:35 PM - INFO] - init_database() - Line 78: database - Database indexes created successfully
-[25-Oct-25 12:11:35 PM - INFO] - __init__() - Line 27: ad_monetization - Monetag ad network configured with 0 ad slot(s)
-[25-Oct-25 12:11:35 PM - INFO] - _log() - Line 97: werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+[25-Oct-25 12:38:59 PM - INFO] - __init__() - Line 31: cache - Cache initialized: max_size=50, ttl=120s
+[25-Oct-25 12:39:01 PM - INFO] - __init__() - Line 46: database - Successfully connected to MongoDB!
+[25-Oct-25 12:39:03 PM - INFO] - init_database() - Line 78: database - Database indexes created successfully
+[25-Oct-25 12:39:03 PM - INFO] - __init__() - Line 27: ad_monetization - Monetag ad network configured with 0 ad slot(s)
+[25-Oct-25 12:39:03 PM - INFO] - _log() - Line 97: werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
  * Running on all addresses (0.0.0.0)
  * Running on http://127.0.0.1:5000
- * Running on http://172.31.95.2:5000
-[25-Oct-25 12:11:35 PM - INFO] - _log() - Line 97: werkzeug - [33mPress CTRL+C to quit[0m
-[25-Oct-25 12:11:39 PM - INFO] - <module>() - Line 37: helpers.utils - PIL not available - thumbnails will be skipped for better RAM efficiency
-[25-Oct-25 12:11:39 PM - INFO] - __init__() - Line 37: queue_manager - Queue Manager initialized: 3 concurrent, 20 max queue
-[25-Oct-25 12:11:39 PM - INFO] - start_processor() - Line 43: queue_manager - Queue processor started
-[25-Oct-25 12:11:39 PM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
-[25-Oct-25 12:11:39 PM - INFO] - start_bot() - Line 125: __main__ - Starting Telegram bot from server.py (long polling)
-[25-Oct-25 12:11:39 PM - INFO] - _init_queue() - Line 1425: main - Download queue processor initialized
-[25-Oct-25 12:11:45 PM - INFO] - start_bot() - Line 132: __main__ - Bot started successfully, waiting for updates...
-[25-Oct-25 12:11:45 PM - INFO] - start_cleanup_task() - Line 196: phone_auth - Started auth session cleanup task
-[25-Oct-25 12:11:45 PM - INFO] - start_bot() - Line 140: __main__ - Started periodic download cleanup task
-[25-Oct-25 12:11:45 PM - INFO] - start_bot() - Line 145: __main__ - Started periodic garbage collection task
-[25-Oct-25 12:11:45 PM - ERROR] - verify_dump_channel() - Line 1453: main - ❌ Dump channel configuration error: Telegram says: [400 CHANNEL_INVALID] (caused by "channels.GetChannels") Pyrogram 2.3.68 thinks: The channel parameter is invalid
-[25-Oct-25 12:11:45 PM - ERROR] - verify_dump_channel() - Line 1454: main - Make sure:
-[25-Oct-25 12:11:45 PM - ERROR] - verify_dump_channel() - Line 1455: main -   1. DUMP_CHANNEL_ID is correct (e.g., -1001234567890)
-[25-Oct-25 12:11:45 PM - ERROR] - verify_dump_channel() - Line 1456: main -   2. Bot is added to the channel as administrator
-[25-Oct-25 12:11:45 PM - ERROR] - verify_dump_channel() - Line 1457: main -   3. Bot has permission to post messages
-[25-Oct-25 12:11:45 PM - ERROR] - verify_dump_channel() - Line 1458: main - Dump channel feature will be disabled until fixed
-[25-Oct-25 12:13:02 PM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
+ * Running on http://172.31.86.194:5000
+[25-Oct-25 12:39:03 PM - INFO] - _log() - Line 97: werkzeug - [33mPress CTRL+C to quit[0m
+[25-Oct-25 12:39:04 PM - INFO] - _log() - Line 97: werkzeug - 127.0.0.1 - - [25/Oct/2025 12:39:04] "GET / HTTP/1.1" 200 -
+[25-Oct-25 12:39:04 PM - INFO] - <module>() - Line 37: helpers.utils - PIL not available - thumbnails will be skipped for better RAM efficiency
+[25-Oct-25 12:39:04 PM - INFO] - __init__() - Line 37: queue_manager - Queue Manager initialized: 3 concurrent, 20 max queue
+[25-Oct-25 12:39:04 PM - INFO] - start_processor() - Line 43: queue_manager - Queue processor started
+[25-Oct-25 12:39:04 PM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
+[25-Oct-25 12:39:04 PM - INFO] - _init_queue() - Line 1393: main - Download queue processor initialized
+[25-Oct-25 12:39:04 PM - INFO] - start_bot() - Line 125: __main__ - Starting Telegram bot from server.py (long polling)
+[25-Oct-25 12:39:10 PM - INFO] - _log() - Line 97: werkzeug - 127.0.0.1 - - [25/Oct/2025 12:39:10] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[25-Oct-25 12:39:10 PM - INFO] - start_bot() - Line 132: __main__ - Bot started successfully, waiting for updates...
+[25-Oct-25 12:39:10 PM - INFO] - start_cleanup_task() - Line 196: phone_auth - Started auth session cleanup task
+[25-Oct-25 12:39:10 PM - INFO] - start_bot() - Line 140: __main__ - Started periodic download cleanup task
+[25-Oct-25 12:39:10 PM - INFO] - start_bot() - Line 145: __main__ - Started periodic garbage collection task
+[25-Oct-25 12:39:10 PM - ERROR] - verify_dump_channel() - Line 1421: main - ❌ Dump channel configuration error: Telegram says: [400 CHANNEL_INVALID] (caused by "channels.GetChannels") Pyrogram 2.3.68 thinks: The channel parameter is invalid
+[25-Oct-25 12:39:10 PM - ERROR] - verify_dump_channel() - Line 1422: main - Make sure:
+[25-Oct-25 12:39:10 PM - ERROR] - verify_dump_channel() - Line 1423: main -   1. DUMP_CHANNEL_ID is correct (e.g., -1001234567890)
+[25-Oct-25 12:39:10 PM - ERROR] - verify_dump_channel() - Line 1424: main -   2. Bot is added to the channel as administrator
+[25-Oct-25 12:39:10 PM - ERROR] - verify_dump_channel() - Line 1425: main -   3. Bot has permission to post messages
+[25-Oct-25 12:39:10 PM - ERROR] - verify_dump_channel() - Line 1426: main - Dump channel feature will be disabled until fixed

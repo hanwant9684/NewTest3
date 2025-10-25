@@ -84,15 +84,9 @@ bot = Client(
     in_memory=True  # Don't write session files to disk
 )
 
-# Client for user session (optional fallback) with optimized settings
-user = Client(
-    "user_session", 
-    workers=workers,
-    max_concurrent_transmissions=concurrent,
-    session_string=PyroConf.SESSION_STRING,
-    sleep_threshold=30,
-    in_memory=True
-) if PyroConf.SESSION_STRING else None
+# REMOVED: Global user client was bypassing SessionManager and wasting 30-100MB RAM
+# All users (including admins) must login with /login command to use SessionManager
+# This ensures proper memory limits (max 3 sessions on Render = 300MB)
 
 # Phone authentication handler
 phone_auth_handler = PhoneAuthHandler(PyroConf.API_ID, PyroConf.API_HASH)
@@ -309,20 +303,10 @@ async def handle_download(bot: Client, message: Message, post_url: str, user_cli
     try:
         chat_id, message_id = getChatMsgID(post_url)
 
-        # Use user's personal session if available
-        # Only fall back to shared session for admins/owner
+        # Use user's personal session (required for all users, including admins)
         client_to_use = user_client
         
         if not client_to_use:
-            # Check if user is admin or owner
-            user_id = message.from_user.id
-            if db.is_admin(user_id) or user_id == PyroConf.OWNER_ID:
-                # Allow admins to use fallback session if configured
-                if user and not user.is_connected:
-                    await user.start()
-                client_to_use = user
-            
-            if not client_to_use:
                 await message.reply(
                     "❌ **No active session found.**\n\n"
                     "Please login with your phone number:\n"
@@ -345,18 +329,9 @@ async def handle_download(bot: Client, message: Message, post_url: str, user_cli
 
             # Check file size limit based on actual client being used
             try:
-                is_premium = False
-                if client_to_use != user:
-                    # User's personal client
-                    me = await client_to_use.get_me()
-                    is_premium = getattr(me, 'is_premium', False)
-                else:
-                    # Bot's session
-                    if hasattr(user, 'me') and user.me:
-                        is_premium = getattr(user.me, 'is_premium', False)
-                    else:
-                        me = await user.get_me()
-                        is_premium = getattr(me, 'is_premium', False)
+                # Check if user's Telegram account has premium
+                me = await client_to_use.get_me()
+                is_premium = getattr(me, 'is_premium', False)
             except:
                 is_premium = False
 
@@ -564,18 +539,11 @@ async def download_range(bot: Client, message: Message):
             f"Please reduce your range and try again."
         )
 
-    # Check if user has personal session
+    # Check if user has personal session (required for all users, including admins)
     user_client = await get_user_client(message.from_user.id)
     client_to_use = user_client
     
     if not client_to_use:
-        # Check if user is admin or owner
-        if db.is_admin(message.from_user.id) or message.from_user.id == PyroConf.OWNER_ID:
-            if user and not user.is_connected:
-                await user.start()
-            client_to_use = user
-        
-        if not client_to_use:
             await message.reply(
                 "❌ **No active session found.**\n\n"
                 "Please login with your phone number:\n"

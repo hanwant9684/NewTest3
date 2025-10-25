@@ -92,3 +92,28 @@ See `RENDER_512MB_OPTIMIZATIONS.md` for complete details and memory breakdown.
 - Downloads now REUSE sessions instead of creating new ones every time
 
 **Files Modified**: `access_control.py`, `main.py`, `server.py`
+
+### ADDITIONAL FIX: Removed Global User Client (Oct 25, 2025)
+**Second Memory Leak Fixed**: After initial SessionManager integration, the bot was still running out of memory on Render due to a global `user` Client instance that bypassed SessionManager.
+
+**Root Cause**:
+- `main.py` had a global `user` Client created at startup (line 88) that consumed an additional 30-100MB RAM
+- This was intended as a fallback session for admins/owners but wasn't managed by SessionManager
+- Combined with the 3 SessionManager sessions, total RAM could reach 400MB (sessions) + 100MB (global client) + 100MB (base) = 600MB, exceeding Render's 512MB limit
+
+**Solution Implemented**:
+1. **Removed Global User Client**: Deleted the global `user` variable completely
+   - Admins and owners must now use `/login` command like regular users
+   - All sessions now go through SessionManager (enforced 3-session limit)
+
+2. **Updated All Code Paths**: Removed fallback logic that used global `user` client
+   - Download handlers now require personal sessions for all users
+   - Graceful error messages guide users to `/login` command
+
+**Impact**:
+- Memory baseline reduced by 30-100MB (no more global client)
+- Total maximum RAM: ~400MB (bot + 3 user sessions) vs previous 600MB+
+- All users treated equally - consistent authentication flow
+- SessionManager limits are now actually enforced
+
+**Files Modified**: `main.py` (removed global `user` client and all references)
