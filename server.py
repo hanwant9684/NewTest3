@@ -150,6 +150,14 @@ def run_bot():
             # Keep the bot running without signal handlers (thread-safe alternative to idle())
             await asyncio.Event().wait()
         finally:
+            # Gracefully disconnect all user sessions before shutdown
+            try:
+                from helpers.session_manager import session_manager
+                await session_manager.disconnect_all()
+                main.LOGGER(__name__).info("Disconnected all user sessions")
+            except Exception as e:
+                main.LOGGER(__name__).error(f"Error disconnecting sessions: {e}")
+            
             await main.bot.stop()
             main.LOGGER(__name__).info("Bot stopped")
     

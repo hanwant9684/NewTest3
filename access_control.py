@@ -127,34 +127,34 @@ async def check_user_session(user_id: int):
     return session is not None
 
 async def get_user_client(user_id: int):
-    """Get user's personal client if they have session (optimized)"""
+    """
+    Get user's personal client if they have session
+    
+    CRITICAL: Uses SessionManager to limit concurrent sessions and prevent memory exhaustion
+    On Render (512MB RAM), limits to 3 concurrent user sessions (3 * 100MB = 300MB)
+    Sessions are reused across downloads - DO NOT call client.stop() after each download!
+    """
     session = db.get_user_session(user_id)
     if session:
-        from pyrogram import Client
         from config import PyroConf
-        import os
+        from helpers.session_manager import session_manager
         import traceback
 
         try:
-            # Optimize resources for constrained environments
-            IS_CONSTRAINED = bool(os.getenv('RENDER') or os.getenv('RENDER_EXTERNAL_URL') or os.getenv('REPLIT_DEPLOYMENT') or os.getenv('REPL_ID'))
-            
-            user_client = Client(
-                f"user_{user_id}",
-                api_id=PyroConf.API_ID,
-                api_hash=PyroConf.API_HASH,
+            # Use SessionManager to get or create session
+            # This prevents memory leaks by limiting concurrent sessions and reusing existing ones
+            user_client = await session_manager.get_or_create_session(
+                user_id=user_id,
                 session_string=session,
-                workers=1 if IS_CONSTRAINED else 2,
-                max_concurrent_transmissions=2 if IS_CONSTRAINED else 4,
-                sleep_threshold=30,
-                in_memory=True  # Use in-memory sessions to avoid file leaks
+                api_id=PyroConf.API_ID,
+                api_hash=PyroConf.API_HASH
             )
-            LOGGER(__name__).info(f"Starting user client for {user_id}...")
-            await user_client.start()
-            LOGGER(__name__).info(f"Successfully started user client for {user_id}")
+            
+            if user_client:
+                LOGGER(__name__).info(f"Got user client for {user_id} from SessionManager")
             return user_client
         except Exception as e:
-            LOGGER(__name__).error(f"Failed to start user client for {user_id}: {e}")
+            LOGGER(__name__).error(f"Failed to get user client for {user_id}: {e}")
             LOGGER(__name__).error(f"Full traceback: {traceback.format_exc()}")
             # Don't immediately clear session - it might be a temporary network issue
             # Only clear if it's an authorization error
@@ -162,6 +162,9 @@ async def get_user_client(user_id: int):
             if 'auth' in error_msg or 'session' in error_msg or 'expired' in error_msg:
                 LOGGER(__name__).warning(f"Clearing invalid session for user {user_id}")
                 db.set_user_session(user_id, None)
+                # Remove from session manager
+                from helpers.session_manager import session_manager
+                await session_manager.remove_session(user_id)
             return None
     return None
 

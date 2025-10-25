@@ -295,7 +295,13 @@ async def help_command(_, message: Message):
     
     await message.reply(help_text, reply_markup=markup, disable_web_page_preview=True)
 
-async def handle_download(bot: Client, message: Message, post_url: str, user_client=None, increment_usage=True, cleanup_client=True):
+async def handle_download(bot: Client, message: Message, post_url: str, user_client=None, increment_usage=True):
+    """
+    Handle downloading media from Telegram posts
+    
+    IMPORTANT: user_client is managed by SessionManager - DO NOT call .stop() on it!
+    The SessionManager will automatically reuse and cleanup sessions to prevent memory leaks.
+    """
     # Cut off URL at '?' if present
     if "?" in post_url:
         post_url = post_url.split("?", 1)[0]
@@ -483,13 +489,6 @@ async def handle_download(bot: Client, message: Message, post_url: str, user_cli
         error_message = f"**❌ {str(e)}**"
         await message.reply(error_message)
         LOGGER(__name__).error(e)
-    finally:
-        # Clean up user client only if cleanup is enabled (not in batch mode)
-        if cleanup_client and user_client and user_client != user:
-            try:
-                await user_client.stop()
-            except:
-                pass
 
 @bot.on_message(filters.command("dl") & filters.private)
 @force_subscribe
@@ -608,7 +607,7 @@ async def download_range(bot: Client, message: Message):
                 skipped += 1
                 continue
 
-            task = track_task(handle_download(bot, message, url, client_to_use, False, cleanup_client=False), message.from_user.id)
+            task = track_task(handle_download(bot, message, url, client_to_use, False), message.from_user.id)
             try:
                 await task
                 downloaded += 1
@@ -616,12 +615,7 @@ async def download_range(bot: Client, message: Message):
                 db.increment_usage(message.from_user.id)
             except asyncio.CancelledError:
                 await loading.delete()
-                # Clean up client before returning
-                if user_client and user_client != user:
-                    try:
-                        await user_client.stop()
-                    except:
-                        pass
+                # SessionManager will handle client cleanup - no need to stop() here
                 return await message.reply(
                     f"**❌ Batch canceled** after downloading `{downloaded}` posts."
                 )
@@ -634,12 +628,7 @@ async def download_range(bot: Client, message: Message):
 
     await loading.delete()
     
-    # Clean up user client after batch completes
-    if user_client and user_client != user:
-        try:
-            await user_client.stop()
-        except:
-            pass
+    # SessionManager will handle client cleanup - no need to stop() here
     
     await message.reply(
         "**✅ Batch Process Complete!**\n"
@@ -760,6 +749,10 @@ async def logout_command(client: Client, message: Message):
     """Logout from account"""
     try:
         if db.set_user_session(message.from_user.id, None):
+            # Also remove from SessionManager to free memory immediately
+            from helpers.session_manager import session_manager
+            await session_manager.remove_session(message.from_user.id)
+            
             await message.reply(
                 "✅ **Successfully logged out!**\n\n"
                 "Use `/login <phone_number>` to login again."
@@ -1476,4 +1469,15 @@ if __name__ == "__main__":
     except Exception as err:
         LOGGER(__name__).error(err)
     finally:
+        # Gracefully disconnect all user sessions before shutdown
+        try:
+            import asyncio
+            from helpers.session_manager import session_manager
+            loop = asyncio.get_event_loop()
+            if not loop.is_closed():
+                loop.run_until_complete(session_manager.disconnect_all())
+                LOGGER(__name__).info("Disconnected all user sessions")
+        except Exception as e:
+            LOGGER(__name__).error(f"Error disconnecting sessions: {e}")
+        
         LOGGER(__name__).info("Bot Stopped")

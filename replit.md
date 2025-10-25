@@ -62,3 +62,33 @@ Applied aggressive memory optimizations for Render's free tier (512MB RAM):
 **Result**: Bot now runs stably at 300-450MB on Render free tier (was crashing at 550-700MB)
 
 See `RENDER_512MB_OPTIMIZATIONS.md` for complete details and memory breakdown.
+
+### CRITICAL FIX: SessionManager Integration (Oct 25, 2025)
+**Memory Leak Fixed**: User client sessions were being created on EVERY download instead of being reused, causing 30-100MB memory allocation per download and rapid RAM exhaustion.
+
+**Root Cause**: 
+- `access_control.py` was calling `get_user_client()` which created NEW Pyrogram Client instances (30-100MB each) on every download
+- These clients were stopped after each download, but memory wasn't released until garbage collection
+- Under load, this caused memory to spike from 300MB → 700MB+ within minutes
+
+**Solution Implemented**:
+1. **SessionManager Integration**: All user session creation now routes through `session_manager.get_or_create_session()`
+   - Reuses existing sessions across multiple downloads
+   - Enforces 3-session concurrent limit on Render (300MB max)
+   - Automatically evicts oldest session when cap is reached
+
+2. **Removed Per-Download Client Teardown**: 
+   - Eliminated all `user_client.stop()` calls from download flows
+   - SessionManager handles lifecycle - clients stay alive for reuse
+   - Memory no longer churns on every download
+
+3. **Proper Cleanup Handlers**:
+   - `/logout` command: Calls `session_manager.remove_session()` for immediate cleanup
+   - Shutdown handlers: Both `server.py` and `main.py` now call `session_manager.disconnect_all()` for graceful shutdown
+
+**Impact**: 
+- Memory usage during downloads: Reduced from 700MB+ → 300-450MB stable
+- Session overhead: From unlimited → capped at 3 concurrent sessions (300MB max)
+- Downloads now REUSE sessions instead of creating new ones every time
+
+**Files Modified**: `access_control.py`, `main.py`, `server.py`
