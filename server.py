@@ -83,6 +83,23 @@ def verify_session():
         'message': message
     })
 
+async def periodic_gc_task():
+    """Periodic garbage collection for memory-constrained environments (Render 512MB)"""
+    import gc
+    import asyncio
+    
+    while True:
+        try:
+            await asyncio.sleep(300)  # Run every 5 minutes
+            # Force garbage collection to free memory from completed downloads
+            collected = gc.collect()
+            if collected > 0:
+                from logger import LOGGER
+                LOGGER(__name__).debug(f"Garbage collection freed {collected} objects")
+        except Exception as e:
+            from logger import LOGGER
+            LOGGER(__name__).error(f"Garbage collection error: {e}")
+
 def run_bot():
     """Run the Telegram bot in a background thread with long polling"""
     import asyncio
@@ -121,6 +138,11 @@ def run_bot():
             from helpers.cleanup import start_periodic_cleanup
             asyncio.create_task(start_periodic_cleanup(interval_minutes=30))
             main.LOGGER(__name__).info("Started periodic download cleanup task")
+            
+            # Start periodic garbage collection for Render's 512MB RAM limit
+            # This helps prevent memory buildup from completed downloads
+            asyncio.create_task(periodic_gc_task())
+            main.LOGGER(__name__).info("Started periodic garbage collection task")
             
             # Verify dump channel after bot starts
             await main.verify_dump_channel()

@@ -7,7 +7,7 @@ from logger import LOGGER
 from database import db
 
 PREMIUM_DOWNLOADS = 1
-AD_WATCH_DURATION_SECONDS = 45
+AD_WATCH_DURATION_SECONDS = 20  # 2 pages × 10 seconds each
 SESSION_VALIDITY_MINUTES = 5
 
 class AdMonetization:
@@ -55,11 +55,11 @@ class AdMonetization:
             db.delete_ad_session(session_id)
             return False, "", "⏰ Session expired. Please start over with /getpremium"
         
-        # Check if enough time has passed (must complete all 3 verification steps = 45 seconds)
+        # Check if enough time has passed (must complete all 2 verification steps = 20 seconds)
         elapsed_seconds = elapsed_time.total_seconds()
         if elapsed_seconds < AD_WATCH_DURATION_SECONDS:
             remaining = AD_WATCH_DURATION_SECONDS - int(elapsed_seconds)
-            return False, "", f"⏰ Please complete all 3 verification steps. Time remaining: {remaining} seconds"
+            return False, "", f"⏰ Please complete all 2 verification steps. Time remaining: {remaining} seconds"
         
         # Atomically mark session as used (prevents race condition)
         success = db.mark_ad_session_used(session_id)

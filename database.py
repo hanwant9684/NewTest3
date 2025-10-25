@@ -27,8 +27,9 @@ class DatabaseManager:
                 os.getenv('REPL_ID')
             )
             
-            # Reduce pool size for Render (saves ~30-40MB)
-            pool_size = 3 if IS_CONSTRAINED else 10
+            # ULTRA-aggressive pool reduction for Render's 512MB (saves ~50-60MB)
+            # 2 connections is enough for light concurrent usage
+            pool_size = 2 if IS_CONSTRAINED else 10
             
             self.client = MongoClient(
                 connection_string,

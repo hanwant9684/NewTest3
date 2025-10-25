@@ -275,10 +275,11 @@ IS_CONSTRAINED = bool(
     os.getenv('REPL_ID')
 )
 
-# Use optimized queue for constrained environments (512MB RAM limit)
-# Render free tier: 10 concurrent downloads (good for 2-3 active users), 50 max queue
+# ULTRA-aggressive settings for Render's 512MB RAM limit
+# Render free tier: 3 concurrent downloads (prevents OOM), 20 max queue
 # Normal deployment: 20 concurrent downloads, 100 max queue
-MAX_CONCURRENT = 10 if IS_CONSTRAINED else 20
-MAX_QUEUE = 50 if IS_CONSTRAINED else 100
+# Note: Large video downloads can use 100-150MB each when buffering
+MAX_CONCURRENT = 3 if IS_CONSTRAINED else 20
+MAX_QUEUE = 20 if IS_CONSTRAINED else 100
 
 download_queue = DownloadQueueManager(max_concurrent=MAX_CONCURRENT, max_queue=MAX_QUEUE)

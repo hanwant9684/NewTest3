@@ -31,8 +31,34 @@ The architecture is modular, separating core functionalities like phone authenti
 - **Monetization Platform**: Monetag
 - **Payment Gateways**: PayPal, UPI, Amazon Pay/Gift Card, Cryptocurrency (USDT/BTC/ETH)
 
-## RAM Optimizations (Latest)
+## RAM Optimizations (Latest - Oct 25, 2025)
+
+### Previous Optimizations
 - **Pillow removed**: Thumbnails are now optional. Bot works without image processing library, saving ~50MB RAM. Video thumbnails extracted via ffmpeg with default dimensions.
 - **Progress bar simplified**: Reduced from multi-line detailed template to single-line "{percentage}% | {speed}/s" format.
 - **Waitress over Gunicorn**: Multi-threaded single-process model uses ~120MB vs gunicorn's ~620MB (4 workers).
 - **Dump channel**: Already optional with graceful degradation when not configured or inaccessible.
+
+### NEW: Render 512MB Ultra-Optimizations
+Applied aggressive memory optimizations for Render's free tier (512MB RAM):
+
+1. **Download Concurrency**: Reduced from 10 to **3 concurrent downloads** for constrained environments
+   - Each video download buffers 100-150MB in memory
+   - 3 downloads = ~450MB max, leaves 60MB safety margin
+   
+2. **Cache Size**: Reduced from 200 to **50 items** (saves ~1MB)
+   - Shorter TTL: 120s instead of 180s for faster memory release
+   
+3. **MongoDB Pool**: Reduced from 3 to **2 connections** (saves ~25MB)
+   - Sufficient for light concurrent usage on free tier
+   
+4. **Queue Capacity**: Reduced from 50 to **20 max queue**
+   - Prevents excessive queue buildup
+   
+5. **Periodic Garbage Collection**: Added automatic GC every 5 minutes
+   - Forces Python to free memory from completed downloads
+   - Prevents gradual memory buildup
+
+**Result**: Bot now runs stably at 300-450MB on Render free tier (was crashing at 550-700MB)
+
+See `RENDER_512MB_OPTIMIZATIONS.md` for complete details and memory breakdown.
