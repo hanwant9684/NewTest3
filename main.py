@@ -1060,7 +1060,7 @@ async def get_premium_command(client: Client, message: Message):
         ])
         
         # Send with video (message ID 42)
-        await send_video_message(message, 41, premium_text, markup, "getpremium command")
+        await send_video_message(message, 42, premium_text, markup, "getpremium command")
         LOGGER(__name__).info(f"User {message.from_user.id} requested ad-based premium")
         
     except Exception as e:
@@ -1225,7 +1225,7 @@ async def callback_handler(client: Client, callback_query: CallbackQuery):
         await callback_query.answer()
         
         # Send with video (message ID 42)
-        await send_video_message(callback_query.message, 41, premium_text, markup, "get_free_premium callback")
+        await send_video_message(callback_query.message, 42, premium_text, markup, "get_free_premium callback")
         LOGGER(__name__).info(f"User {user_id} requested ad-based premium via button")
         
     elif data == "get_paid_premium":
@@ -1317,7 +1317,7 @@ async def callback_handler(client: Client, callback_query: CallbackQuery):
         await callback_query.answer()
         
         # Send with video (message ID 42)
-        await send_video_message(callback_query.message, 41, premium_text, markup, "watch_ad_now callback")
+        await send_video_message(callback_query.message, 42, premium_text, markup, "watch_ad_now callback")
         LOGGER(__name__).info(f"User {user_id} requested ad-based download via button")
     
     elif data == "upgrade_premium":
