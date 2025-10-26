@@ -15,6 +15,7 @@ class PyroConf:
 
     API_HASH = os.getenv("API_HASH", "")
     BOT_TOKEN = os.getenv("BOT_TOKEN", "")
+    BOT_USERNAME = os.getenv("BOT_USERNAME", "")
     SESSION_STRING = os.getenv("SESSION_STRING", "")
     
     # MongoDB Configuration

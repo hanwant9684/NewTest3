@@ -165,6 +165,27 @@ async def auto_add_owner_as_admin(_, message: Message):
 @bot.on_message(filters.command("start") & filters.private & new_updates_only)
 @register_user
 async def start(_, message: Message):
+    # Check if this is a verification deep link (format: /start verify_CODE)
+    if len(message.command) > 1 and message.command[1].startswith("verify_"):
+        verification_code = message.command[1].replace("verify_", "").strip()
+        LOGGER(__name__).info(f"Auto-verification triggered for user {message.from_user.id} with code {verification_code}")
+        
+        success, msg = ad_monetization.verify_code(verification_code, message.from_user.id)
+        
+        if success:
+            await message.reply(
+                f"✅ **Automatic Verification Successful!**\n\n{msg}\n\n"
+                "🎉 You can now start downloading!\n"
+                "📥 Just paste any Telegram link to begin."
+            )
+            LOGGER(__name__).info(f"User {message.from_user.id} successfully auto-verified and received downloads")
+        else:
+            await message.reply(
+                f"❌ **Verification Failed**\n\n{msg}\n\n"
+                "Please try getting a new code with `/getpremium`"
+            )
+        return
+    
     welcome_text = (
         "🎉 **Welcome to Save Restricted Content Bot!**\n\n"
         "━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"

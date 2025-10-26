@@ -32,6 +32,46 @@ The architecture is modular, separating core functionalities like phone authenti
 
 ## Recent Changes
 
+### Automatic Verification System (Oct 26, 2025)
+**New Feature**: Implemented one-click automatic verification using Telegram deep links to improve user experience.
+
+**Previous Flow**:
+1. User completes ad session
+2. Reaches verification page with code
+3. Manually copies code
+4. Types `/verifypremium <code>` in bot
+5. Receives free downloads
+
+**New Flow**:
+1. User completes ad session
+2. Reaches verification page with code
+3. Clicks "Auto-Verify in Bot" button
+4. Automatically opens bot and verifies
+5. Instantly receives free downloads
+
+**Implementation Details**:
+1. **Telegram Deep Links**: Added button with format `https://t.me/<BOT_USERNAME>?start=verify_<CODE>` that automatically opens the bot with the verification code
+2. **Start Command Handler**: Modified `/start` command in `main.py` to detect and process verification deep links (format: `/start verify_<CODE>`)
+3. **HTML Template**: Updated `templates/verify_success.html` to show "Auto-Verify" button as primary option, with manual copy-paste as fallback
+4. **Bot Username Config**: Added `BOT_USERNAME` environment variable to `config.py` for deep link generation
+5. **Server Integration**: Updated `server.py` to pass bot username to verification template
+
+**Benefits**:
+- Eliminates manual copy-paste step
+- Reduces user error from incorrect code entry
+- Faster verification process (1 click vs multiple steps)
+- Better mobile experience
+- Maintains backward compatibility with manual verification
+
+**Environment Variable Required**:
+- `BOT_USERNAME` - Your bot's Telegram username (without @)
+
+**Files Modified**:
+- `main.py` - Added deep link verification handler in start command
+- `config.py` - Added BOT_USERNAME configuration
+- `server.py` - Pass bot_username to template rendering
+- `templates/verify_success.html` - Added Auto-Verify button with Telegram deep link
+
 ### URL Shortener Rotation System (Oct 26, 2025)
 **New Feature**: Implemented automatic rotation between 4 URL shortener services to maximize ad revenue and distribute traffic.
 

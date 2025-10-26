@@ -8,6 +8,7 @@ import sys
 from flask import Flask, jsonify, render_template, request, Response
 from flask_compress import Compress
 from ad_monetization import ad_monetization
+from config import PyroConf
 
 app = Flask(__name__)
 
@@ -36,16 +37,20 @@ def verify_ad():
     
     success, code, message = ad_monetization.verify_ad_completion(session_id)
     
+    bot_username = PyroConf.BOT_USERNAME
+    
     if success:
         response = app.make_response(render_template('verify_success.html',
                                                       title='Ad Completed!',
                                                       message='Thank you for watching the ad. Here is your verification code:',
-                                                      code=code))
+                                                      code=code,
+                                                      bot_username=bot_username))
     else:
         response = app.make_response(render_template('verify_success.html',
                                                       title='Verification Failed',
                                                       message=message,
-                                                      code=None))
+                                                      code=None,
+                                                      bot_username=bot_username))
     
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'

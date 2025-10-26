@@ -1,4 +1,29 @@
-[26-Oct-25 03:54:47 PM - INFO] - __init__() - Line 31: cache - Cache initialized: max_size=50, ttl=120s
-[26-Oct-25 03:54:50 PM - INFO] - __init__() - Line 46: database - Successfully connected to MongoDB!
-[26-Oct-25 03:54:52 PM - INFO] - init_database() - Line 78: database - Database indexes created successfully
-[26-Oct-25 03:54:52 PM - INFO] - __init__() - Line 28: ad_monetization - URL shortener services configured: droplink, gplinks, arlinks, upshrink
+[26-Oct-25 04:23:59 PM - INFO] - __init__() - Line 31: cache - Cache initialized: max_size=50, ttl=120s
+[26-Oct-25 04:24:01 PM - INFO] - __init__() - Line 46: database - Successfully connected to MongoDB!
+[26-Oct-25 04:24:03 PM - INFO] - init_database() - Line 78: database - Database indexes created successfully
+[26-Oct-25 04:24:03 PM - INFO] - __init__() - Line 28: ad_monetization - URL shortener services configured: droplink, gplinks, arlinks, upshrink
+[26-Oct-25 04:24:03 PM - INFO] - _log() - Line 97: werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.31.74.130:5000
+[26-Oct-25 04:24:03 PM - INFO] - _log() - Line 97: werkzeug - [33mPress CTRL+C to quit[0m
+[26-Oct-25 04:24:04 PM - INFO] - <module>() - Line 37: helpers.utils - PIL not available - thumbnails will be skipped for better RAM efficiency
+[26-Oct-25 04:24:04 PM - INFO] - __init__() - Line 37: queue_manager - Queue Manager initialized: 3 concurrent, 20 max queue
+[26-Oct-25 04:24:04 PM - INFO] - start_processor() - Line 43: queue_manager - Queue processor started
+[26-Oct-25 04:24:04 PM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
+[26-Oct-25 04:24:04 PM - INFO] - _init_queue() - Line 1413: main - Download queue processor initialized
+[26-Oct-25 04:24:04 PM - INFO] - start_bot() - Line 101: __main__ - Starting Telegram bot from server.py (long polling)
+[26-Oct-25 04:24:05 PM - INFO] - _log() - Line 97: werkzeug - 172.31.74.130 - - [26/Oct/2025 16:24:05] "GET / HTTP/1.1" 200 -
+[26-Oct-25 04:24:10 PM - INFO] - start_bot() - Line 108: __main__ - Bot started successfully, waiting for updates...
+[26-Oct-25 04:24:10 PM - INFO] - start_cleanup_task() - Line 196: phone_auth - Started auth session cleanup task
+[26-Oct-25 04:24:10 PM - INFO] - start_bot() - Line 116: __main__ - Started periodic download cleanup task
+[26-Oct-25 04:24:10 PM - INFO] - start_bot() - Line 121: __main__ - Started periodic garbage collection task
+[26-Oct-25 04:24:10 PM - ERROR] - verify_dump_channel() - Line 1441: main - ❌ Dump channel configuration error: Telegram says: [400 CHANNEL_INVALID] (caused by "channels.GetChannels") Pyrogram 2.3.68 thinks: The channel parameter is invalid
+[26-Oct-25 04:24:10 PM - ERROR] - verify_dump_channel() - Line 1442: main - Make sure:
+[26-Oct-25 04:24:10 PM - ERROR] - verify_dump_channel() - Line 1443: main -   1. DUMP_CHANNEL_ID is correct (e.g., -1001234567890)
+[26-Oct-25 04:24:10 PM - ERROR] - verify_dump_channel() - Line 1444: main -   2. Bot is added to the channel as administrator
+[26-Oct-25 04:24:10 PM - ERROR] - verify_dump_channel() - Line 1445: main -   3. Bot has permission to post messages
+[26-Oct-25 04:24:10 PM - ERROR] - verify_dump_channel() - Line 1446: main - Dump channel feature will be disabled until fixed
+[26-Oct-25 04:27:38 PM - INFO] - _log() - Line 97: werkzeug - 172.31.74.130 - - [26/Oct/2025 16:27:38] "GET / HTTP/1.1" 200 -
+[26-Oct-25 04:32:29 PM - INFO] - _log() - Line 97: werkzeug - 172.31.74.130 - - [26/Oct/2025 16:32:29] "GET / HTTP/1.1" 200 -
+[26-Oct-25 04:32:43 PM - INFO] - _log() - Line 97: werkzeug - 172.31.74.130 - - [26/Oct/2025 16:32:43] "GET / HTTP/1.1" 200 -
