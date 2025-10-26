@@ -323,6 +323,9 @@ class DatabaseManager:
             
             # Admins and paid users have no limits
             if user_type in ['admin', 'paid']:
+                # Increment shortener rotation for each file downloaded
+                for _ in range(count):
+                    self.increment_shortener_rotation()
                 return True
             
             # Reset ad downloads if it's a new day (must happen before reading ad_downloads)
@@ -349,6 +352,9 @@ class DatabaseManager:
                     LOGGER(__name__).info(f"User {user_id} used {count} ad download(s), {ad_downloads - count} remaining")
                     # CRITICAL: Clear cache to prevent stale ad_downloads from being reused
                     self.cache.delete(f"user_{user_id}")
+                    # Increment shortener rotation for each file downloaded
+                    for _ in range(count):
+                        self.increment_shortener_rotation()
                     return True
                 else:
                     # Race condition: another process might have used the ad downloads
@@ -367,6 +373,11 @@ class DatabaseManager:
                 {"$inc": {"files_downloaded": count}},
                 upsert=True
             )
+            
+            # Increment shortener rotation for each file downloaded
+            for _ in range(count):
+                self.increment_shortener_rotation()
+            
             return True
         except Exception as e:
             LOGGER(__name__).error(f"Error incrementing usage for {user_id}: {e}")

@@ -285,9 +285,6 @@ class AdMonetization:
         
         LOGGER(__name__).info(f"Using {service_name} for ad link (rotation index: {current_index}, download {rotation_state.get('downloads_in_cycle', 0) + 1}/5)")
         
-        # Increment rotation counter for next time
-        db.increment_shortener_rotation()
-        
         if bot_domain:
             verify_url = f"{bot_domain}/verify-ad?session={session_id}"
             short_url = shorten_func(verify_url)

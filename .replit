@@ -7,7 +7,7 @@ channel = "stable-25_05"
 packages = ["cacert", "freetype", "lcms2", "libimagequant", "libjpeg", "libtiff", "libuv", "libwebp", "libxcrypt", "openjpeg", "tcl", "tk", "zlib"]
 
 [workflows]
-runButton = "Bot Server"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Project"
