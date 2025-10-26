@@ -15,11 +15,19 @@ SESSION_VALIDITY_MINUTES = 30
 
 class AdMonetization:
     def __init__(self):
-        api_key = os.getenv('DROPLINK_API_KEY')
-        if api_key:
-            LOGGER(__name__).info("Droplink.co ad monetization configured")
+        # Check all URL shortener API keys
+        self.services = {
+            'droplink': os.getenv('DROPLINK_API_KEY'),
+            'gplinks': os.getenv('GPLINKS_API_KEY'),
+            'arlinks': os.getenv('ARLINKS_API_KEY'),
+            'upshrink': os.getenv('UPSHRINK_API_KEY')
+        }
+        
+        configured_services = [name for name, key in self.services.items() if key]
+        if configured_services:
+            LOGGER(__name__).info(f"URL shortener services configured: {', '.join(configured_services)}")
         else:
-            LOGGER(__name__).warning("DROPLINK_API_KEY not configured - ad monetization disabled")
+            LOGGER(__name__).warning("No URL shortener API keys configured - ad monetization disabled")
     
     def create_ad_session(self, user_id: int) -> str:
         """Create a temporary session for ad watching"""
@@ -93,7 +101,7 @@ class AdMonetization:
         """Shorten URL using droplink.co API"""
         import requests
         
-        api_key = os.getenv('DROPLINK_API_KEY')
+        api_key = self.services.get('droplink')
         if not api_key:
             LOGGER(__name__).warning("DROPLINK_API_KEY not configured, returning original URL")
             return long_url
@@ -129,16 +137,161 @@ class AdMonetization:
         
         return long_url
     
+    def _shorten_with_gplinks(self, long_url: str) -> str:
+        """Shorten URL using gplinks.co API"""
+        import requests
+        
+        api_key = self.services.get('gplinks')
+        if not api_key:
+            LOGGER(__name__).warning("GPLINKS_API_KEY not configured, falling back to droplink")
+            return self._shorten_with_droplink(long_url)
+        
+        try:
+            response = requests.get(
+                "https://api.gplinks.com/api",
+                params={
+                    "api": api_key,
+                    "url": long_url
+                },
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                if data.get("status") == "success":
+                    short_url = data.get("shortenedUrl")
+                    
+                    if short_url:
+                        LOGGER(__name__).info(f"Successfully shortened URL via gplinks.com: {short_url}")
+                        return short_url
+                    else:
+                        LOGGER(__name__).error(f"GPLinks API response missing shortenedUrl: {data}")
+                else:
+                    LOGGER(__name__).error(f"GPLinks API returned non-success status: {data}")
+            else:
+                LOGGER(__name__).error(f"GPLinks API error {response.status_code}: {response.text}")
+        
+        except Exception as e:
+            LOGGER(__name__).error(f"Failed to shorten URL with gplinks.com: {e}")
+        
+        # Fallback to droplink on failure
+        LOGGER(__name__).info("Falling back to droplink.co")
+        return self._shorten_with_droplink(long_url)
+    
+    def _shorten_with_arlinks(self, long_url: str) -> str:
+        """Shorten URL using arlinks.in API"""
+        import requests
+        
+        api_key = self.services.get('arlinks')
+        if not api_key:
+            LOGGER(__name__).warning("ARLINKS_API_KEY not configured, falling back to droplink")
+            return self._shorten_with_droplink(long_url)
+        
+        try:
+            # ARLinks likely follows similar pattern to droplink/gplinks
+            response = requests.get(
+                "https://arlinks.in/api",
+                params={
+                    "api": api_key,
+                    "url": long_url
+                },
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                if data.get("status") == "success":
+                    short_url = data.get("shortenedUrl")
+                    
+                    if short_url:
+                        LOGGER(__name__).info(f"Successfully shortened URL via arlinks.in: {short_url}")
+                        return short_url
+                    else:
+                        LOGGER(__name__).error(f"ARLinks API response missing shortenedUrl: {data}")
+                else:
+                    LOGGER(__name__).error(f"ARLinks API returned non-success status: {data}")
+            else:
+                LOGGER(__name__).error(f"ARLinks API error {response.status_code}: {response.text}")
+        
+        except Exception as e:
+            LOGGER(__name__).error(f"Failed to shorten URL with arlinks.in: {e}")
+        
+        # Fallback to droplink on failure
+        LOGGER(__name__).info("Falling back to droplink.co")
+        return self._shorten_with_droplink(long_url)
+    
+    def _shorten_with_upshrink(self, long_url: str) -> str:
+        """Shorten URL using upshrink.com API"""
+        import requests
+        
+        api_key = self.services.get('upshrink')
+        if not api_key:
+            LOGGER(__name__).warning("UPSHRINK_API_KEY not configured, falling back to droplink")
+            return self._shorten_with_droplink(long_url)
+        
+        try:
+            # UpShrink likely follows similar pattern to droplink/gplinks
+            response = requests.get(
+                "https://upshrink.com/api",
+                params={
+                    "api": api_key,
+                    "url": long_url
+                },
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                if data.get("status") == "success":
+                    short_url = data.get("shortenedUrl")
+                    
+                    if short_url:
+                        LOGGER(__name__).info(f"Successfully shortened URL via upshrink.com: {short_url}")
+                        return short_url
+                    else:
+                        LOGGER(__name__).error(f"UpShrink API response missing shortenedUrl: {data}")
+                else:
+                    LOGGER(__name__).error(f"UpShrink API returned non-success status: {data}")
+            else:
+                LOGGER(__name__).error(f"UpShrink API error {response.status_code}: {response.text}")
+        
+        except Exception as e:
+            LOGGER(__name__).error(f"Failed to shorten URL with upshrink.com: {e}")
+        
+        # Fallback to droplink on failure
+        LOGGER(__name__).info("Falling back to droplink.co")
+        return self._shorten_with_droplink(long_url)
+    
     def generate_droplink_ad_link(self, user_id: int, bot_domain: str | None = None) -> tuple[str, str]:
-        """Generate droplink.co monetized ad link"""
+        """Generate monetized ad link using rotation system (droplink -> gplinks -> arlinks -> upshrink)"""
         session_id = self.create_ad_session(user_id)
         
-        LOGGER(__name__).info(f"Generated droplink ad session {session_id} for user {user_id}")
+        # Get current rotation state
+        rotation_state = db.get_shortener_rotation_state()
+        current_index = rotation_state.get('current_index', 0)
+        
+        # Map index to service
+        service_map = {
+            0: ('droplink', self._shorten_with_droplink),
+            1: ('gplinks', self._shorten_with_gplinks),
+            2: ('arlinks', self._shorten_with_arlinks),
+            3: ('upshrink', self._shorten_with_upshrink)
+        }
+        
+        service_name, shorten_func = service_map.get(current_index, ('droplink', self._shorten_with_droplink))
+        
+        LOGGER(__name__).info(f"Using {service_name} for ad link (rotation index: {current_index}, download {rotation_state.get('downloads_in_cycle', 0) + 1}/5)")
+        
+        # Increment rotation counter for next time
+        db.increment_shortener_rotation()
         
         if bot_domain:
             verify_url = f"{bot_domain}/verify-ad?session={session_id}"
-            droplink_url = self._shorten_with_droplink(verify_url)
-            return session_id, droplink_url
+            short_url = shorten_func(verify_url)
+            return session_id, short_url
         
         return session_id, "https://example.com/verify"
     

@@ -743,5 +743,69 @@ class DatabaseManager:
         except Exception as e:
             LOGGER(__name__).error(f"Error getting ad downloads for {user_id}: {e}")
             return 0
+    
+    def get_shortener_rotation_state(self) -> Dict:
+        """Get current URL shortener rotation state (global, resets daily)"""
+        try:
+            # Create a dedicated collection for rotation state
+            if not hasattr(self, 'shortener_rotation'):
+                self.shortener_rotation = self.db['shortener_rotation']
+            
+            today = datetime.now().strftime('%Y-%m-%d')
+            
+            # Get or create rotation state
+            state = self.shortener_rotation.find_one({"_id": "global"})
+            
+            if not state or state.get('date') != today:
+                # Reset rotation state for new day
+                self.shortener_rotation.update_one(
+                    {"_id": "global"},
+                    {"$set": {
+                        "date": today,
+                        "current_index": 0,  # 0=droplink, 1=gplinks, 2=arlinks, 3=upshrink
+                        "downloads_in_cycle": 0  # 0-4 for current service
+                    }},
+                    upsert=True
+                )
+                LOGGER(__name__).info(f"Initialized shortener rotation for {today}")
+                # Fetch the document to return
+                state = self.shortener_rotation.find_one({"_id": "global"})
+                if state:
+                    return state
+            
+            return state
+        except Exception as e:
+            LOGGER(__name__).error(f"Error getting shortener rotation state: {e}")
+            # Fallback to droplink
+            return {"_id": "global", "date": datetime.now().strftime('%Y-%m-%d'), "current_index": 0, "downloads_in_cycle": 0}
+    
+    def increment_shortener_rotation(self) -> None:
+        """Increment rotation counter and cycle to next service if needed"""
+        try:
+            if not hasattr(self, 'shortener_rotation'):
+                self.shortener_rotation = self.db['shortener_rotation']
+            
+            state = self.get_shortener_rotation_state()
+            downloads_in_cycle = state['downloads_in_cycle'] + 1
+            current_index = state['current_index']
+            
+            # Check if we need to rotate to next service (after 5 downloads)
+            if downloads_in_cycle >= 5:
+                current_index = (current_index + 1) % 4  # Rotate: 0->1->2->3->0
+                downloads_in_cycle = 0
+                LOGGER(__name__).info(f"Rotating to service index {current_index}")
+            
+            # Update rotation state
+            self.shortener_rotation.update_one(
+                {"_id": "global"},
+                {
+                    "$set": {
+                        "current_index": current_index,
+                        "downloads_in_cycle": downloads_in_cycle
+                    }
+                }
+            )
+        except Exception as e:
+            LOGGER(__name__).error(f"Error incrementing shortener rotation: {e}")
 
 db = DatabaseManager()
