@@ -1,0 +1,33 @@
+[26-Oct-25 07:50:14 AM - INFO] - __init__() - Line 31: cache - Cache initialized: max_size=50, ttl=120s
+[26-Oct-25 07:50:17 AM - INFO] - __init__() - Line 46: database - Successfully connected to MongoDB!
+[26-Oct-25 07:50:18 AM - INFO] - init_database() - Line 78: database - Database indexes created successfully
+[26-Oct-25 07:50:18 AM - INFO] - __init__() - Line 20: ad_monetization - Droplink.co ad monetization configured
+[26-Oct-25 07:50:18 AM - INFO] - _log() - Line 97: werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.31.99.226:5000
+[26-Oct-25 07:50:18 AM - INFO] - _log() - Line 97: werkzeug - [33mPress CTRL+C to quit[0m
+[26-Oct-25 07:50:21 AM - INFO] - _log() - Line 97: werkzeug - 172.31.99.226 - - [26/Oct/2025 07:50:21] "GET / HTTP/1.1" 200 -
+[26-Oct-25 07:50:21 AM - INFO] - <module>() - Line 37: helpers.utils - PIL not available - thumbnails will be skipped for better RAM efficiency
+[26-Oct-25 07:50:21 AM - INFO] - __init__() - Line 37: queue_manager - Queue Manager initialized: 3 concurrent, 20 max queue
+[26-Oct-25 07:50:21 AM - INFO] - start_processor() - Line 43: queue_manager - Queue processor started
+[26-Oct-25 07:50:21 AM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
+[26-Oct-25 07:50:21 AM - INFO] - start_bot() - Line 96: __main__ - Starting Telegram bot from server.py (long polling)
+[26-Oct-25 07:50:21 AM - INFO] - _init_queue() - Line 1392: main - Download queue processor initialized
+[26-Oct-25 07:50:28 AM - INFO] - start_bot() - Line 103: __main__ - Bot started successfully, waiting for updates...
+[26-Oct-25 07:50:28 AM - INFO] - start_cleanup_task() - Line 196: phone_auth - Started auth session cleanup task
+[26-Oct-25 07:50:28 AM - INFO] - start_bot() - Line 111: __main__ - Started periodic download cleanup task
+[26-Oct-25 07:50:28 AM - INFO] - start_bot() - Line 116: __main__ - Started periodic garbage collection task
+[26-Oct-25 07:50:28 AM - ERROR] - verify_dump_channel() - Line 1420: main - ❌ Dump channel configuration error: Telegram says: [400 CHANNEL_INVALID] (caused by "channels.GetChannels") Pyrogram 2.3.68 thinks: The channel parameter is invalid
+[26-Oct-25 07:50:28 AM - ERROR] - verify_dump_channel() - Line 1421: main - Make sure:
+[26-Oct-25 07:50:28 AM - ERROR] - verify_dump_channel() - Line 1422: main -   1. DUMP_CHANNEL_ID is correct (e.g., -1001234567890)
+[26-Oct-25 07:50:28 AM - ERROR] - verify_dump_channel() - Line 1423: main -   2. Bot is added to the channel as administrator
+[26-Oct-25 07:50:28 AM - ERROR] - verify_dump_channel() - Line 1424: main -   3. Bot has permission to post messages
+[26-Oct-25 07:50:28 AM - ERROR] - verify_dump_channel() - Line 1425: main - Dump channel feature will be disabled until fixed
+[26-Oct-25 07:50:41 AM - INFO] - _log() - Line 97: werkzeug - 172.31.99.226 - - [26/Oct/2025 07:50:41] "GET / HTTP/1.1" 200 -
+[26-Oct-25 07:50:50 AM - INFO] - get_premium_command() - Line 1005: main - get_premium_command triggered by user 721236024
+[26-Oct-25 07:50:51 AM - INFO] - get_app_url() - Line 115: config - Detected Replit domain: https://8b95db11-fe8c-4d85-bb01-7f9869e072b1-00-1vj1oarq7posm.spock.replit.dev
+[26-Oct-25 07:50:51 AM - INFO] - create_ad_session() - Line 29: ad_monetization - Created ad session 9f2fe64c46fd090274c123a575a82bfc for user 721236024
+[26-Oct-25 07:50:51 AM - INFO] - generate_droplink_ad_link() - Line 136: ad_monetization - Generated droplink ad session 9f2fe64c46fd090274c123a575a82bfc for user 721236024
+[26-Oct-25 07:50:51 AM - INFO] - _shorten_with_droplink() - Line 118: ad_monetization - Successfully shortened URL via droplink.co: https://droplink.co/rntkKR74
+[26-Oct-25 07:50:52 AM - INFO] - get_premium_command() - Line 1064: main - User 721236024 requested ad-based premium

@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: telegram-bot
+    runtime: python
+    plan: free
+    buildCommand: pip install --no-cache-dir -r requirements.txt
+    startCommand: waitress-serve --host=0.0.0.0 --port=$PORT --threads=4 --channel-timeout=120 --asyncore-use-poll=true server:app
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: RENDER
+        value: "true"
+      - key: WEB_CONCURRENCY
+        value: "1"
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: MALLOC_TRIM_THRESHOLD_
+        value: "100000"
