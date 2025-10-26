@@ -176,10 +176,17 @@
             <div class="verification-code" id="code" onclick="copyCode()">{{ code }}</div>
         </div>
         
+        {% if bot_username %}
+        <a href="https://t.me/{{ bot_username }}?start=verify_{{ code }}" class="copy-btn" style="display: inline-block; text-decoration: none; margin-top: 20px; background: #48bb78;">
+            ✅ Auto-Verify in Bot
+        </a>
+        <p style="margin: 15px 0; color: #718096; font-size: 14px;">Click above to automatically verify, or:</p>
+        {% endif %}
+        
         <button class="copy-btn" id="copyBtn" onclick="copyCode()">📋 Copy Code</button>
         
         <div class="instructions">
-            <h3>📱 Next Steps:</h3>
+            <h3>📱 Manual Verification:</h3>
             <ol>
                 <li>Go back to the Telegram bot</li>
                 <li>Send this command:<br><code>/verifypremium {{ code }}</code></li>
