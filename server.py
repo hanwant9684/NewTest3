@@ -33,30 +33,66 @@ def health():
 @app.route('/verify-ad')
 def verify_ad():
     """GET endpoint to verify ad completion and show verification code page (for droplink.co)"""
-    session_id = request.args.get('session', '')
-    
-    success, code, message = ad_monetization.verify_ad_completion(session_id)
-    
-    bot_username = PyroConf.BOT_USERNAME
-    
-    if success:
+    try:
+        session_id = request.args.get('session', '').strip()
+        
+        if not session_id:
+            response = app.make_response(render_template('verify_success.html',
+                                                          title='Invalid Request',
+                                                          message='No session ID provided. Please use the link from /getpremium command.',
+                                                          code=None,
+                                                          bot_username=PyroConf.BOT_USERNAME))
+            response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+            response.headers['Pragma'] = 'no-cache'
+            response.headers['Expires'] = '0'
+            return response
+        
+        success, code, message = ad_monetization.verify_ad_completion(session_id)
+        
+        bot_username = PyroConf.BOT_USERNAME or ''
+        
+        if success:
+            from logger import LOGGER
+            LOGGER(__name__).info(f"Ad verification successful for session {session_id[:8]}..., code: {code}")
+            
+            response = app.make_response(render_template('verify_success.html',
+                                                          title='Ad Completed Successfully! 🎉',
+                                                          message='Congratulations! You have successfully completed the ad verification.',
+                                                          code=code,
+                                                          bot_username=bot_username))
+        else:
+            from logger import LOGGER
+            LOGGER(__name__).warning(f"Ad verification failed for session {session_id[:8] if session_id else 'empty'}...: {message}")
+            
+            response = app.make_response(render_template('verify_success.html',
+                                                          title='Verification Failed',
+                                                          message=message,
+                                                          code=None,
+                                                          bot_username=bot_username))
+        
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['X-Frame-Options'] = 'DENY'
+        
+        return response
+        
+    except Exception as e:
+        from logger import LOGGER
+        LOGGER(__name__).error(f"Error in verify_ad endpoint: {e}")
+        
         response = app.make_response(render_template('verify_success.html',
-                                                      title='Ad Completed!',
-                                                      message='Thank you for watching the ad. Here is your verification code:',
-                                                      code=code,
-                                                      bot_username=bot_username))
-    else:
-        response = app.make_response(render_template('verify_success.html',
-                                                      title='Verification Failed',
-                                                      message=message,
+                                                      title='Server Error',
+                                                      message='An unexpected error occurred. Please try again or contact support.',
                                                       code=None,
-                                                      bot_username=bot_username))
-    
-    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
-    
-    return response
+                                                      bot_username=PyroConf.BOT_USERNAME or ''))
+        
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        
+        return response
 
 
 async def periodic_gc_task():

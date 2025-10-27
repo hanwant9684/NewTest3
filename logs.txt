@@ -1,29 +1,53 @@
-[26-Oct-25 04:23:59 PM - INFO] - __init__() - Line 31: cache - Cache initialized: max_size=50, ttl=120s
-[26-Oct-25 04:24:01 PM - INFO] - __init__() - Line 46: database - Successfully connected to MongoDB!
-[26-Oct-25 04:24:03 PM - INFO] - init_database() - Line 78: database - Database indexes created successfully
-[26-Oct-25 04:24:03 PM - INFO] - __init__() - Line 28: ad_monetization - URL shortener services configured: droplink, gplinks, arlinks, upshrink
-[26-Oct-25 04:24:03 PM - INFO] - _log() - Line 97: werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+[27-Oct-25 02:37:31 AM - INFO] - __init__() - Line 31: cache - Cache initialized: max_size=50, ttl=120s
+[27-Oct-25 02:37:33 AM - INFO] - __init__() - Line 46: database - Successfully connected to MongoDB!
+[27-Oct-25 02:37:35 AM - INFO] - init_database() - Line 78: database - Database indexes created successfully
+[27-Oct-25 02:37:35 AM - INFO] - __init__() - Line 28: ad_monetization - URL shortener services configured: droplink, gplinks, arlinks, upshrink
+[27-Oct-25 02:37:35 AM - INFO] - _log() - Line 97: werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
  * Running on all addresses (0.0.0.0)
  * Running on http://127.0.0.1:5000
- * Running on http://172.31.74.130:5000
-[26-Oct-25 04:24:03 PM - INFO] - _log() - Line 97: werkzeug - [33mPress CTRL+C to quit[0m
-[26-Oct-25 04:24:04 PM - INFO] - <module>() - Line 37: helpers.utils - PIL not available - thumbnails will be skipped for better RAM efficiency
-[26-Oct-25 04:24:04 PM - INFO] - __init__() - Line 37: queue_manager - Queue Manager initialized: 3 concurrent, 20 max queue
-[26-Oct-25 04:24:04 PM - INFO] - start_processor() - Line 43: queue_manager - Queue processor started
-[26-Oct-25 04:24:04 PM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
-[26-Oct-25 04:24:04 PM - INFO] - _init_queue() - Line 1413: main - Download queue processor initialized
-[26-Oct-25 04:24:04 PM - INFO] - start_bot() - Line 101: __main__ - Starting Telegram bot from server.py (long polling)
-[26-Oct-25 04:24:05 PM - INFO] - _log() - Line 97: werkzeug - 172.31.74.130 - - [26/Oct/2025 16:24:05] "GET / HTTP/1.1" 200 -
-[26-Oct-25 04:24:10 PM - INFO] - start_bot() - Line 108: __main__ - Bot started successfully, waiting for updates...
-[26-Oct-25 04:24:10 PM - INFO] - start_cleanup_task() - Line 196: phone_auth - Started auth session cleanup task
-[26-Oct-25 04:24:10 PM - INFO] - start_bot() - Line 116: __main__ - Started periodic download cleanup task
-[26-Oct-25 04:24:10 PM - INFO] - start_bot() - Line 121: __main__ - Started periodic garbage collection task
-[26-Oct-25 04:24:10 PM - ERROR] - verify_dump_channel() - Line 1441: main - ❌ Dump channel configuration error: Telegram says: [400 CHANNEL_INVALID] (caused by "channels.GetChannels") Pyrogram 2.3.68 thinks: The channel parameter is invalid
-[26-Oct-25 04:24:10 PM - ERROR] - verify_dump_channel() - Line 1442: main - Make sure:
-[26-Oct-25 04:24:10 PM - ERROR] - verify_dump_channel() - Line 1443: main -   1. DUMP_CHANNEL_ID is correct (e.g., -1001234567890)
-[26-Oct-25 04:24:10 PM - ERROR] - verify_dump_channel() - Line 1444: main -   2. Bot is added to the channel as administrator
-[26-Oct-25 04:24:10 PM - ERROR] - verify_dump_channel() - Line 1445: main -   3. Bot has permission to post messages
-[26-Oct-25 04:24:10 PM - ERROR] - verify_dump_channel() - Line 1446: main - Dump channel feature will be disabled until fixed
-[26-Oct-25 04:27:38 PM - INFO] - _log() - Line 97: werkzeug - 172.31.74.130 - - [26/Oct/2025 16:27:38] "GET / HTTP/1.1" 200 -
-[26-Oct-25 04:32:29 PM - INFO] - _log() - Line 97: werkzeug - 172.31.74.130 - - [26/Oct/2025 16:32:29] "GET / HTTP/1.1" 200 -
-[26-Oct-25 04:32:43 PM - INFO] - _log() - Line 97: werkzeug - 172.31.74.130 - - [26/Oct/2025 16:32:43] "GET / HTTP/1.1" 200 -
+ * Running on http://172.31.111.130:5000
+[27-Oct-25 02:37:35 AM - INFO] - _log() - Line 97: werkzeug - [33mPress CTRL+C to quit[0m
+[27-Oct-25 02:37:36 AM - INFO] - <module>() - Line 37: helpers.utils - PIL not available - thumbnails will be skipped for better RAM efficiency
+[27-Oct-25 02:37:36 AM - INFO] - __init__() - Line 37: queue_manager - Queue Manager initialized: 3 concurrent, 20 max queue
+[27-Oct-25 02:37:36 AM - INFO] - start_processor() - Line 43: queue_manager - Queue processor started
+[27-Oct-25 02:37:36 AM - INFO] - verify_and_log() - Line 62: attribution - Bot initialized - Creator: @Wolfy004
+[27-Oct-25 02:37:36 AM - INFO] - start_bot() - Line 137: __main__ - Starting Telegram bot from server.py (long polling)
+[27-Oct-25 02:37:36 AM - INFO] - _init_queue() - Line 1413: main - Download queue processor initialized
+[27-Oct-25 02:37:36 AM - INFO] - _log() - Line 97: werkzeug - 172.31.111.130 - - [27/Oct/2025 02:37:36] "GET / HTTP/1.1" 200 -
+[27-Oct-25 02:37:42 AM - INFO] - start_bot() - Line 144: __main__ - Bot started successfully, waiting for updates...
+[27-Oct-25 02:37:42 AM - INFO] - start_cleanup_task() - Line 196: phone_auth - Started auth session cleanup task
+[27-Oct-25 02:37:42 AM - INFO] - start_bot() - Line 152: __main__ - Started periodic download cleanup task
+[27-Oct-25 02:37:42 AM - INFO] - start_bot() - Line 157: __main__ - Started periodic garbage collection task
+[27-Oct-25 02:37:42 AM - ERROR] - verify_dump_channel() - Line 1441: main - ❌ Dump channel configuration error: Telegram says: [400 CHANNEL_INVALID] (caused by "channels.GetChannels") Pyrogram 2.3.68 thinks: The channel parameter is invalid
+[27-Oct-25 02:37:42 AM - ERROR] - verify_dump_channel() - Line 1442: main - Make sure:
+[27-Oct-25 02:37:42 AM - ERROR] - verify_dump_channel() - Line 1443: main -   1. DUMP_CHANNEL_ID is correct (e.g., -1001234567890)
+[27-Oct-25 02:37:42 AM - ERROR] - verify_dump_channel() - Line 1444: main -   2. Bot is added to the channel as administrator
+[27-Oct-25 02:37:42 AM - ERROR] - verify_dump_channel() - Line 1445: main -   3. Bot has permission to post messages
+[27-Oct-25 02:37:42 AM - ERROR] - verify_dump_channel() - Line 1446: main - Dump channel feature will be disabled until fixed
+[27-Oct-25 02:37:47 AM - INFO] - get_premium_command() - Line 1026: main - get_premium_command triggered by user 7481690649
+[27-Oct-25 02:37:48 AM - INFO] - get_app_url() - Line 116: config - Detected Replit domain: https://aabbac15-d632-4169-a104-b1cee8d4e221-00-2f3991jryc6od.picard.replit.dev
+[27-Oct-25 02:37:48 AM - INFO] - create_ad_session() - Line 37: ad_monetization - Created ad session 4a70b77096cc4f23df787e831262eab8 for user 7481690649
+[27-Oct-25 02:37:48 AM - INFO] - generate_droplink_ad_link() - Line 293: ad_monetization - User 7481690649: Generating ad link with droplink (index 0)
+[27-Oct-25 02:37:49 AM - INFO] - _shorten_with_droplink() - Line 130: ad_monetization - Successfully shortened URL via droplink.co: https://droplink.co/9ePL6
+[27-Oct-25 02:37:49 AM - INFO] - get_premium_command() - Line 1085: main - User 7481690649 requested ad-based premium
+[27-Oct-25 02:41:25 AM - INFO] - _generate_verification_code() - Line 72: ad_monetization - Generated verification code 48F9C077 for user 7481690649
+[27-Oct-25 02:41:25 AM - INFO] - verify_ad_completion() - Line 64: ad_monetization - User 7481690649 completed ad session 4a70b77096cc4f23df787e831262eab8, generated code 48F9C077
+[27-Oct-25 02:41:25 AM - INFO] - verify_ad() - Line 56: __main__ - Ad verification successful for session 4a70b770..., code: 48F9C077
+[27-Oct-25 02:41:25 AM - INFO] - _log() - Line 97: werkzeug - 172.31.111.130 - - [27/Oct/2025 02:41:25] "GET /verify-ad?session=4a70b77096cc4f23df787e831262eab8 HTTP/1.1" 200 -
+[27-Oct-25 02:41:34 AM - INFO] - start() - Line 171: main - Auto-verification triggered for user 7481690649 with code 48F9C077
+[27-Oct-25 02:41:35 AM - INFO] - add_ad_downloads() - Line 710: database - Added 5 ad downloads to user 7481690649
+[27-Oct-25 02:41:35 AM - INFO] - rotate_user_shortener() - Line 791: database - User 7481690649: Next ad link will use gplinks (rotated from droplink)
+[27-Oct-25 02:41:35 AM - INFO] - verify_code() - Line 101: ad_monetization - User 7481690649 successfully verified code 48F9C077, granted 5 ad downloads
+[27-Oct-25 02:41:36 AM - INFO] - start() - Line 181: main - User 7481690649 successfully auto-verified and received downloads
+[27-Oct-25 02:41:40 AM - INFO] - get_premium_command() - Line 1026: main - get_premium_command triggered by user 7481690649
+[27-Oct-25 02:41:41 AM - INFO] - get_app_url() - Line 116: config - Detected Replit domain: https://aabbac15-d632-4169-a104-b1cee8d4e221-00-2f3991jryc6od.picard.replit.dev
+[27-Oct-25 02:41:41 AM - INFO] - create_ad_session() - Line 37: ad_monetization - Created ad session c56fe791f406a9cf87f176c6c1a4ba53 for user 7481690649
+[27-Oct-25 02:41:41 AM - INFO] - generate_droplink_ad_link() - Line 293: ad_monetization - User 7481690649: Generating ad link with gplinks (index 1)
+[27-Oct-25 02:41:42 AM - INFO] - _generate_verification_code() - Line 72: ad_monetization - Generated verification code 7E2E03A2 for user 7481690649
+[27-Oct-25 02:41:42 AM - INFO] - verify_ad_completion() - Line 64: ad_monetization - User 7481690649 completed ad session c56fe791f406a9cf87f176c6c1a4ba53, generated code 7E2E03A2
+[27-Oct-25 02:41:42 AM - INFO] - verify_ad() - Line 56: __main__ - Ad verification successful for session c56fe791..., code: 7E2E03A2
+[27-Oct-25 02:41:42 AM - INFO] - _log() - Line 97: werkzeug - 172.31.111.130 - - [27/Oct/2025 02:41:42] "HEAD /verify-ad?session=c56fe791f406a9cf87f176c6c1a4ba53 HTTP/1.1" 200 -
+[27-Oct-25 02:41:43 AM - WARNING] - verify_ad() - Line 65: __main__ - Ad verification failed for session c56fe791...: ❌ Invalid or expired session. Please start over with /getpremium
+[27-Oct-25 02:41:43 AM - INFO] - _log() - Line 97: werkzeug - 172.31.111.130 - - [27/Oct/2025 02:41:43] "GET /verify-ad?session=c56fe791f406a9cf87f176c6c1a4ba53 HTTP/1.1" 200 -
+[27-Oct-25 02:41:43 AM - INFO] - _shorten_with_gplinks() - Line 170: ad_monetization - Successfully shortened URL via gplinks.com: https://gplinks.co/CHkA
+[27-Oct-25 02:41:43 AM - INFO] - get_premium_command() - Line 1085: main - User 7481690649 requested ad-based premium

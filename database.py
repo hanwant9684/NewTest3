@@ -755,6 +755,46 @@ class DatabaseManager:
             LOGGER(__name__).error(f"Error getting ad downloads for {user_id}: {e}")
             return 0
     
+    def get_user_shortener_index(self, user_id: int) -> int:
+        """Get user's current shortener index for per-user rotation
+        Returns: 0=droplink, 1=gplinks, 2=arlinks, 3=upshrink"""
+        try:
+            user = self.get_user(user_id)
+            if user and 'shortener_index' in user:
+                return user['shortener_index']
+            # First time user - start with droplink (index 0)
+            return 0
+        except Exception as e:
+            LOGGER(__name__).error(f"Error getting shortener index for user {user_id}: {e}")
+            return 0  # Default to droplink on error
+    
+    def rotate_user_shortener(self, user_id: int) -> int:
+        """Rotate user to next shortener service and return new index
+        Rotation: 0 (droplink) -> 1 (gplinks) -> 2 (arlinks) -> 3 (upshrink) -> 0 (cycle)
+        
+        Call this AFTER user completes verification to prepare next shortener for their next request"""
+        try:
+            current_index = self.get_user_shortener_index(user_id)
+            next_index = (current_index + 1) % 4  # Rotate through 0->1->2->3->0
+            
+            # Update user's shortener index
+            self.users.update_one(
+                {"user_id": user_id},
+                {"$set": {"shortener_index": next_index}},
+                upsert=False
+            )
+            
+            # Clear cache to ensure fresh data
+            self.cache.delete(f"user_{user_id}")
+            
+            service_names = {0: 'droplink', 1: 'gplinks', 2: 'arlinks', 3: 'upshrink'}
+            LOGGER(__name__).info(f"User {user_id}: Next ad link will use {service_names.get(next_index)} (rotated from {service_names.get(current_index)})")
+            
+            return next_index
+        except Exception as e:
+            LOGGER(__name__).error(f"Error rotating shortener for user {user_id}: {e}")
+            return 0  # Fallback to droplink on error
+    
     def get_shortener_rotation_state(self) -> Dict:
         """Get current URL shortener rotation state (global, resets daily)"""
         try:

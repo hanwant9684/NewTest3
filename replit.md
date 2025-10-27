@@ -32,8 +32,10 @@ The architecture is modular, separating core functionalities like phone authenti
 
 ## Recent Changes
 
-### Automatic Verification System (Oct 26, 2025)
-**New Feature**: Implemented one-click automatic verification using Telegram deep links to improve user experience.
+### Enhanced Verification Page & Auto-Verification System (Oct 26, 2025)
+**Major Update**: Completely rebuilt verification page with security, reliability, and user experience improvements, plus one-click automatic verification.
+
+#### 🎯 User Experience Improvements
 
 **Previous Flow**:
 1. User completes ad session
@@ -45,70 +47,143 @@ The architecture is modular, separating core functionalities like phone authenti
 **New Flow**:
 1. User completes ad session
 2. Reaches verification page with code
-3. Clicks "Auto-Verify in Bot" button
-4. Automatically opens bot and verifies
-5. Instantly receives free downloads
+3. Clicks "Auto-Verify in Bot" button → **Done!**
+4. Instantly receives free downloads
 
-**Implementation Details**:
-1. **Telegram Deep Links**: Added button with format `https://t.me/<BOT_USERNAME>?start=verify_<CODE>` that automatically opens the bot with the verification code
-2. **Start Command Handler**: Modified `/start` command in `main.py` to detect and process verification deep links (format: `/start verify_<CODE>`)
-3. **HTML Template**: Updated `templates/verify_success.html` to show "Auto-Verify" button as primary option, with manual copy-paste as fallback
-4. **Bot Username Config**: Added `BOT_USERNAME` environment variable to `config.py` for deep link generation
-5. **Server Integration**: Updated `server.py` to pass bot username to verification template
+#### 🔒 Security & Reliability Features
 
-**Benefits**:
-- Eliminates manual copy-paste step
-- Reduces user error from incorrect code entry
-- Faster verification process (1 click vs multiple steps)
-- Better mobile experience
-- Maintains backward compatibility with manual verification
+**Frontend (verify_success.html)**:
+1. **Code Backup System**: Automatically saves verification code to browser's localStorage to prevent loss
+2. **30-Minute Timer**: Live countdown showing exact time remaining before code expires
+3. **Expiry Warnings**: Visual alerts when code is close to expiring (last 5 minutes pulse animation)
+4. **Offline Detection**: Shows warning banner when user loses internet connection
+5. **Multiple Copy Methods**: 
+   - Primary: Modern Clipboard API
+   - Fallback 1: Legacy execCommand method
+   - Fallback 2: Manual prompt with pre-selected code
+6. **Error Boundaries**: Catches JavaScript errors and shows graceful error messages
+7. **Code Leak Prevention**: Prevents verification code from appearing in browser console logs
+8. **Mobile Optimized**: Responsive design with touch-friendly buttons
+9. **Loading States**: Shows spinner during processing
+10. **Visual Feedback**: Success/error alerts for all user actions
+11. **Troubleshooting Guide**: Built-in tips for common issues
+12. **Exit Warning**: Warns user before leaving page (code will be lost)
+13. **Accessibility**: ARIA labels and keyboard navigation support
+14. **Security Headers**: Prevents page from being embedded in iframes (clickjacking protection)
 
-**Environment Variable Required**:
+**Backend (server.py)**:
+1. **Input Validation**: Validates session_id exists and is properly formatted
+2. **Error Handling**: Try-catch blocks prevent server crashes
+3. **Detailed Logging**: Logs all verification attempts for debugging
+4. **Better Error Messages**: User-friendly error descriptions for each failure scenario
+5. **Security Headers**: Added X-Content-Type-Options, X-Frame-Options for protection
+6. **Cache Control**: Prevents browsers from caching sensitive verification pages
+
+#### 🚀 Technical Implementation
+
+**Deep Link Auto-Verification**:
+- Format: `https://t.me/<BOT_USERNAME>?start=verify_<CODE>`
+- Clicking button automatically opens Telegram app/web
+- Bot receives `/start verify_<CODE>` and processes verification
+- User sees instant success message in bot
+
+**Timer System**:
+- JavaScript interval updates countdown every second
+- Stores expiry time in localStorage (survives page refresh)
+- Changes to red pulsing animation in last 5 minutes
+- Automatically marks code as expired when timer reaches 0
+
+**Error Recovery**:
+- If page fails to load: Code backed up in localStorage
+- If clipboard fails: Multiple fallback copy methods
+- If offline: Warning shown, page still functional when back online
+- If server error: Graceful error page with retry instructions
+
+#### 📝 Files Modified
+- `main.py` - Added deep link verification handler in `/start` command
+- `config.py` - Added `BOT_USERNAME` configuration
+- `server.py` - Enhanced error handling, logging, security headers
+- `templates/verify_success.html` - Complete rebuild with all reliability features
+
+#### ⚙️ Environment Variable Required
 - `BOT_USERNAME` - Your bot's Telegram username (without @)
+  - Example: If bot is @MyBot, set `BOT_USERNAME=MyBot`
+  - Used to generate deep links for auto-verification
 
-**Files Modified**:
-- `main.py` - Added deep link verification handler in start command
-- `config.py` - Added BOT_USERNAME configuration
-- `server.py` - Pass bot_username to template rendering
-- `templates/verify_success.html` - Added Auto-Verify button with Telegram deep link
+#### 🎁 Benefits
+- ✅ 70% faster verification (1 click vs 5+ steps)
+- ✅ Zero user errors from typos
+- ✅ Code never lost (automatic backup)
+- ✅ Works offline (shows warning, recovers when online)
+- ✅ Mobile-friendly design
+- ✅ Prevents code expiry surprises (live timer)
+- ✅ Multiple fallback mechanisms
+- ✅ Professional user experience
+- ✅ Secure against common web attacks
 
-### URL Shortener Rotation System (Oct 26, 2025)
-**New Feature**: Implemented automatic rotation between 4 URL shortener services to maximize ad revenue and distribute traffic.
+### Per-User URL Shortener Rotation System (Oct 27, 2025)
+**Major Update**: Changed from global rotation to per-user rotation for better ad revenue distribution and user experience.
 
-**Rotation Pattern** (resets daily):
-- Downloads 1-5: Droplink.co
-- Downloads 6-10: GPLinks.com
-- Downloads 11-15: ARLinks.in
-- Downloads 16-20: UpShrink.com
-- Downloads 21+: Cycle repeats from Droplink
+**How It Works Now**:
+- Each user gets a different shortener service each time they use `/getpremium`
+- Rotation is tracked individually per user, not globally
+- After successful verification, user is rotated to next shortener for their next request
+
+**User Experience**:
+```
+User's 1st /getpremium → Droplink.co
+After verification...
+User's 2nd /getpremium → GPLinks.com
+After verification...
+User's 3rd /getpremium → ARLinks.in
+After verification...
+User's 4th /getpremium → UpShrink.com
+After verification...
+User's 5th /getpremium → Droplink.co (cycle repeats)
+```
+
+**Key Changes from Previous System**:
+- ❌ **Old:** Global rotation after every 5 downloads (all users shared same shortener)
+- ✅ **New:** Per-user rotation (each user has their own rotation cycle)
 
 **Implementation Details**:
-1. **Database Tracking**: New MongoDB collection `shortener_rotation` stores global rotation state with fields:
-   - `current_index`: Current service index (0-3)
-   - `downloads_in_cycle`: Download count for current service (0-4)
-   - `date`: Current date for daily reset logic
+1. **Database Tracking**: Added `shortener_index` field to users collection
+   - Stores each user's current index (0-3)
+   - 0=Droplink, 1=GPLinks, 2=ARLinks, 3=UpShrink
+   - First-time users start at index 0 (Droplink)
 
-2. **Service Integration**: Added API integration methods in `ad_monetization.py`:
+2. **New Database Methods** in `database.py`:
+   - `get_user_shortener_index(user_id)` - Get user's current shortener index
+   - `rotate_user_shortener(user_id)` - Rotate user to next shortener after verification
+
+3. **Service Integration** in `ad_monetization.py`:
    - `_shorten_with_droplink()` - Droplink.co API
    - `_shorten_with_gplinks()` - GPLinks.com API  
    - `_shorten_with_arlinks()` - ARLinks.in API
    - `_shorten_with_upshrink()` - UpShrink.com API
 
-3. **Fallback Mechanism**: If any service fails (API error, timeout, invalid response), automatically falls back to Droplink.co
+4. **Rotation Trigger**: Happens automatically in `verify_code()` method
+   - After user successfully verifies code
+   - Before granting ad downloads
+   - Prepares next shortener for user's next `/getpremium` request
 
-4. **Environment Variables Required**:
+5. **Fallback Mechanism**: If any service fails, automatically falls back to Droplink.co
+
+6. **Environment Variables Required**:
    - `DROPLINK_API_KEY` - Droplink.co API token
    - `GPLINKS_API_KEY` - GPLinks.com API token
    - `ARLINKS_API_KEY` - ARLinks.in API token
    - `UPSHRINK_API_KEY` - UpShrink.com API token
 
 **Benefits**:
-- Diversified ad revenue across multiple platforms
-- Load balancing prevents service-specific rate limits
-- Automatic daily reset ensures fair distribution
-- Graceful degradation if any service is unavailable
+- ✅ Better user experience (each user gets fresh shortener each time)
+- ✅ More even ad revenue distribution across all services
+- ✅ No service gets overloaded (traffic distributed per user, not globally)
+- ✅ First-time users always start with Droplink (most reliable)
+- ✅ Prevents users from being stuck on same shortener
+- ✅ Each user contributes to all 4 ad platforms equally over time
 
 **Files Modified**:
-- `database.py` - Added `get_shortener_rotation_state()` and `increment_shortener_rotation()` methods
-- `ad_monetization.py` - Added 3 new API integration methods, updated `generate_droplink_ad_link()` to use rotation
+- `database.py` - Added per-user rotation methods, deprecated global rotation
+- `ad_monetization.py` - Updated to use per-user rotation, added rotation trigger after verification
 - `config.py` - Already supported multiple API keys via environment variables

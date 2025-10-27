@@ -94,6 +94,10 @@ class AdMonetization:
         # Grant ad downloads
         db.add_ad_downloads(user_id, PREMIUM_DOWNLOADS)
         
+        # Rotate user to next shortener for their next /getpremium request
+        # This ensures each user gets a different shortener service each time
+        db.rotate_user_shortener(user_id)
+        
         LOGGER(__name__).info(f"User {user_id} successfully verified code {code}, granted {PREMIUM_DOWNLOADS} ad downloads")
         return True, f"✅ **Verification successful!**\n\nYou now have **{PREMIUM_DOWNLOADS} free download(s)**!"
     
@@ -266,12 +270,15 @@ class AdMonetization:
         return self._shorten_with_droplink(long_url)
     
     def generate_droplink_ad_link(self, user_id: int, bot_domain: str | None = None) -> tuple[str, str]:
-        """Generate monetized ad link using rotation system (droplink -> gplinks -> arlinks -> upshrink)"""
+        """Generate monetized ad link using per-user rotation system
+        
+        Each user gets different shortener on each /getpremium request:
+        1st request: Droplink -> 2nd: GPLinks -> 3rd: ARLinks -> 4th: UpShrink -> 5th: Droplink (cycle repeats)
+        """
         session_id = self.create_ad_session(user_id)
         
-        # Get current rotation state
-        rotation_state = db.get_shortener_rotation_state()
-        current_index = rotation_state.get('current_index', 0)
+        # Get user's current shortener index (per-user rotation, not global)
+        current_index = db.get_user_shortener_index(user_id)
         
         # Map index to service
         service_map = {
@@ -283,7 +290,7 @@ class AdMonetization:
         
         service_name, shorten_func = service_map.get(current_index, ('droplink', self._shorten_with_droplink))
         
-        LOGGER(__name__).info(f"Using {service_name} for ad link (rotation index: {current_index}, download {rotation_state.get('downloads_in_cycle', 0) + 1}/5)")
+        LOGGER(__name__).info(f"User {user_id}: Generating ad link with {service_name} (index {current_index})")
         
         if bot_domain:
             verify_url = f"{bot_domain}/verify-ad?session={session_id}"
