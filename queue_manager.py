@@ -128,7 +128,12 @@ class DownloadQueueManager:
     
     async def _execute_download(self, user_id: int, download_coro, message):
         try:
+            from memory_monitor import memory_monitor
+            memory_monitor.log_memory_snapshot("Download Started", f"User {user_id} | Active: {len(self.active_downloads)}")
+            
             await download_coro
+            
+            memory_monitor.log_memory_snapshot("Download Completed", f"User {user_id} | Active: {len(self.active_downloads)}")
         except Exception as e:
             LOGGER(__name__).error(f"Download error for user {user_id}: {e}")
             try:

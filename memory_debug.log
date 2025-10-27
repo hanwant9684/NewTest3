@@ -1,0 +1,41 @@
+================================================================================
+MEMORY DEBUG LOG - Telegram Bot on Render 512MB Plan
+Started: 2025-10-27 11:52:48
+================================================================================
+
+This file captures critical memory events to help debug OOM crashes.
+Check this file after crashes to see what happened before running out of RAM.
+
+--------------------------------------------------------------------------------
+
+[2025-10-27 11:52:55] ⚠️ MEMORY SPIKE: +92.5 MB
+[2025-10-27 11:52:55] 📊 MEMORY SNAPSHOT | Operation: Bot Startup
+├─ RAM Usage: 92.5 MB (Virtual: 736.3 MB)
+├─ System: 31.5% used (44048.5 MB available)
+├─ Sessions: 0 | Queue: 0 | Active DLs: 0
+├─ Cache: 0 items | Threads: 10 | Open files: 1
+└─ Context: Initial state after bot start
+[2025-10-27 11:52:55] Recent operations:
+[2025-10-27 11:52:55]   1. [11:52:55] Bot Startup - 92.5 MB - Initial state after bot start
+[2025-10-27 11:52:55] --------------------------------------------------------------------------------
+
+[2025-10-27 11:57:55] 📊 Periodic Snapshot: 92.9 MB
+[2025-10-27 11:57:55]    Sessions: 0 | Queue: 0 | Active DLs: 0 | Cache: 0
+
+
+================================================================================
+🔄 BOT RESTARTED at 2025-10-27 11:58:02
+Previous session may have crashed - check logs above
+================================================================================
+
+[2025-10-27 11:58:09] ⚠️ MEMORY SPIKE: +92.5 MB
+[2025-10-27 11:58:09] 📊 MEMORY SNAPSHOT | Operation: Bot Startup
+├─ RAM Usage: 92.5 MB (Virtual: 736.4 MB)
+├─ System: 34.0% used (42419.9 MB available)
+├─ Sessions: 0 | Queue: 0 | Active DLs: 0
+├─ Cache: 0 items | Threads: 10 | Open files: 1
+└─ Context: Initial state after bot start
+[2025-10-27 11:58:09] Recent operations:
+[2025-10-27 11:58:09]   1. [11:58:09] Bot Startup - 92.5 MB - Initial state after bot start
+[2025-10-27 11:58:09] --------------------------------------------------------------------------------
+

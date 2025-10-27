@@ -30,6 +30,194 @@ def health():
     # HTTP 204 No Content = 0 bytes body vs JSON = ~20 bytes
     return '', 204
 
+@app.route('/memory-debug')
+def view_memory_debug():
+    """
+    View memory debug log - for Render free plan users who can't access Shell
+    Access this at: https://your-app.onrender.com/memory-debug
+    """
+    try:
+        import os
+        memory_log_file = 'memory_debug.log'
+        
+        if not os.path.exists(memory_log_file):
+            return """
+            <html>
+            <head><title>Memory Debug Log</title></head>
+            <body style="font-family: monospace; padding: 20px; background: #1e1e1e; color: #d4d4d4;">
+                <h1 style="color: #4ec9b0;">Memory Debug Log - Not Found</h1>
+                <p style="color: #ce9178;">The memory log file hasn't been created yet. It will be created when the bot starts.</p>
+                <p><a href="/" style="color: #569cd6;">← Back to home</a></p>
+            </body>
+            </html>
+            """, 404
+        
+        # Read the entire log file
+        with open(memory_log_file, 'r') as f:
+            log_content = f.read()
+        
+        # Return as HTML with copy button
+        html = f"""
+        <html>
+        <head>
+            <title>Memory Debug Log - Render Free Plan</title>
+            <meta charset="utf-8">
+            <style>
+                body {{
+                    font-family: 'Courier New', monospace;
+                    padding: 20px;
+                    background: #1e1e1e;
+                    color: #d4d4d4;
+                    margin: 0;
+                }}
+                .header {{
+                    background: #2d2d30;
+                    padding: 20px;
+                    margin: -20px -20px 20px -20px;
+                    border-bottom: 2px solid #007acc;
+                }}
+                h1 {{
+                    color: #4ec9b0;
+                    margin: 0 0 10px 0;
+                }}
+                .info {{
+                    color: #ce9178;
+                    font-size: 14px;
+                }}
+                .actions {{
+                    margin: 20px 0;
+                }}
+                button {{
+                    background: #0e639c;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    font-size: 14px;
+                    cursor: pointer;
+                    border-radius: 3px;
+                    margin-right: 10px;
+                }}
+                button:hover {{
+                    background: #1177bb;
+                }}
+                #log-content {{
+                    background: #252526;
+                    padding: 20px;
+                    border-radius: 5px;
+                    white-space: pre-wrap;
+                    word-wrap: break-word;
+                    font-size: 13px;
+                    line-height: 1.5;
+                    border: 1px solid #3e3e42;
+                    max-height: 600px;
+                    overflow-y: auto;
+                }}
+                .alert {{
+                    background: #d4a24c;
+                    color: #000;
+                    padding: 10px;
+                    border-radius: 3px;
+                    margin: 10px 0;
+                    display: none;
+                }}
+                .success {{
+                    background: #4ec9b0;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>🔍 Memory Debug Log</h1>
+                <p class="info">For Render Free Plan - No Shell Access Required</p>
+                <p class="info">File size: {len(log_content)} bytes | Last updated: just now</p>
+            </div>
+            
+            <div class="actions">
+                <button onclick="copyToClipboard()">📋 Copy All to Clipboard</button>
+                <button onclick="downloadFile()">💾 Download as File</button>
+                <button onclick="location.reload()">🔄 Refresh</button>
+            </div>
+            
+            <div id="alert" class="alert"></div>
+            
+            <h3 style="color: #569cd6;">Log Contents:</h3>
+            <div id="log-content">{log_content}</div>
+            
+            <div style="margin-top: 20px; color: #858585; font-size: 12px;">
+                <p><strong>Instructions for sharing with developer:</strong></p>
+                <ol>
+                    <li>Click "Copy All to Clipboard" button above</li>
+                    <li>Paste into a text file or message</li>
+                    <li>Share the contents to diagnose memory issues</li>
+                </ol>
+                <p><strong>What to look for:</strong></p>
+                <ul>
+                    <li>🚨 CRITICAL sections (right before crash)</li>
+                    <li>⚠️ HIGH MEMORY warnings</li>
+                    <li>Number of sessions, downloads, and cache items</li>
+                    <li>Recent operations before memory spikes</li>
+                </ul>
+            </div>
+            
+            <script>
+                function copyToClipboard() {{
+                    const text = document.getElementById('log-content').innerText;
+                    navigator.clipboard.writeText(text).then(function() {{
+                        showAlert('✅ Copied to clipboard successfully!', true);
+                    }}, function() {{
+                        // Fallback for older browsers
+                        const textArea = document.createElement('textarea');
+                        textArea.value = text;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        showAlert('✅ Copied to clipboard!', true);
+                    }});
+                }}
+                
+                function downloadFile() {{
+                    const text = document.getElementById('log-content').innerText;
+                    const blob = new Blob([text], {{ type: 'text/plain' }});
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'memory_debug_' + new Date().toISOString().slice(0,10) + '.log';
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    showAlert('✅ File downloaded!', true);
+                }}
+                
+                function showAlert(message, success) {{
+                    const alert = document.getElementById('alert');
+                    alert.textContent = message;
+                    alert.className = 'alert' + (success ? ' success' : '');
+                    alert.style.display = 'block';
+                    setTimeout(() => {{
+                        alert.style.display = 'none';
+                    }}, 3000);
+                }}
+            </script>
+        </body>
+        </html>
+        """
+        
+        return html
+        
+    except Exception as e:
+        from logger import LOGGER
+        LOGGER(__name__).error(f"Error serving memory debug log: {e}")
+        return f"""
+        <html>
+        <head><title>Error</title></head>
+        <body style="font-family: monospace; padding: 20px; background: #1e1e1e; color: #d4d4d4;">
+            <h1 style="color: #f48771;">Error Loading Memory Log</h1>
+            <p style="color: #ce9178;">Error: {str(e)}</p>
+            <p><a href="/" style="color: #569cd6;">← Back to home</a></p>
+        </body>
+        </html>
+        """, 500
+
 @app.route('/verify-ad')
 def verify_ad():
     """GET endpoint to verify ad completion and show verification code page (for droplink.co)"""
@@ -99,6 +287,7 @@ async def periodic_gc_task():
     """Periodic garbage collection for memory-constrained environments (Render 512MB)"""
     import gc
     import asyncio
+    from memory_monitor import memory_monitor
     
     while True:
         try:
@@ -108,6 +297,7 @@ async def periodic_gc_task():
             if collected > 0:
                 from logger import LOGGER
                 LOGGER(__name__).debug(f"Garbage collection freed {collected} objects")
+                memory_monitor.log_memory_snapshot("Garbage Collection", f"Freed {collected} objects")
         except Exception as e:
             from logger import LOGGER
             LOGGER(__name__).error(f"Garbage collection error: {e}")
@@ -155,6 +345,15 @@ def run_bot():
             # This helps prevent memory buildup from completed downloads
             asyncio.create_task(periodic_gc_task())
             main.LOGGER(__name__).info("Started periodic garbage collection task")
+            
+            # Start periodic memory monitoring for Render 512MB plan debugging
+            # This logs memory usage every 5 minutes to help identify RAM issues
+            from memory_monitor import memory_monitor
+            asyncio.create_task(memory_monitor.periodic_monitor(interval=300))
+            main.LOGGER(__name__).info("Started periodic memory monitoring (5-minute intervals)")
+            
+            # Log initial memory snapshot
+            memory_monitor.log_memory_snapshot("Bot Startup", "Initial state after bot start")
             
             # Verify dump channel after bot starts
             await main.verify_dump_channel()

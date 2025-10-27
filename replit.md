@@ -32,6 +32,95 @@ The architecture is modular, separating core functionalities like phone authenti
 
 ## Recent Changes
 
+### Comprehensive Memory Monitoring System (Oct 27, 2025)
+**Major Update**: Added extensive memory monitoring and debugging tools specifically for Render 512MB plan deployments.
+
+#### 🔍 Memory Tracking Features
+
+**Automatic Operation Tracking**:
+- Session creation/cleanup (each session ~100MB)
+- Download start/completion with file sizes
+- Upload operations
+- Garbage collection effectiveness
+- Queue state and active downloads
+
+**Real-time Monitoring**:
+- Periodic snapshots every 5 minutes
+- Memory spike detection (alerts on +50MB sudden increases)
+- High memory warnings (alerts when >400MB on 512MB plan)
+- Recent operation history (last 20 operations before spike)
+
+**Detailed Metrics Logged**:
+- RSS (actual RAM usage) and Virtual memory
+- System memory percentage and available memory
+- Active user sessions count
+- Download queue size and active downloads
+- Database cache items
+- Thread count and open file descriptors
+
+#### 📊 Memory Snapshot Format
+
+Each log entry shows complete state:
+```
+📊 MEMORY SNAPSHOT | Operation: Download Started
+├─ RAM Usage: 287.5 MB (Virtual: 1024.3 MB)
+├─ System: 56.2% used (223.8 MB available)
+├─ Sessions: 2 | Queue: 0 | Active DLs: 1
+├─ Cache: 12 items | Threads: 8 | Open files: 15
+└─ Context: User 12345 | Active: 1
+```
+
+#### ⚠️ Automatic Alerts
+
+**Memory Spike Detection**:
+- Triggers when memory increases by 50MB+ suddenly
+- Logs recent operation history to identify cause
+- Shows before/after memory usage
+
+**High Memory Warning**:
+- Triggers when memory exceeds 400MB (on 512MB plan)
+- Forces garbage collection automatically
+- Logs current system state for debugging
+
+#### 🎯 Use Cases
+
+1. **Debug OOM Crashes**: Logs show exactly what happened before memory ran out
+2. **Identify Memory Leaks**: Periodic monitoring shows gradual memory growth patterns
+3. **Optimize Performance**: See which operations consume most RAM
+4. **Prevent Issues**: Early warnings before hitting memory limits
+
+#### 📝 Files Modified
+
+- `memory_monitor.py` - NEW: Complete memory monitoring system
+- `helpers/session_manager.py` - Added memory tracking for session lifecycle
+- `queue_manager.py` - Added memory tracking for download operations
+- `server.py` - Integrated periodic monitoring and GC tracking
+- `main.py` - Imported memory monitor module
+- `MEMORY_MONITORING_GUIDE.md` - NEW: Complete debugging guide
+
+#### 🚀 How to Use
+
+The system runs automatically - no configuration needed. To debug memory issues:
+
+1. **Check Logs**: Search for "MEMORY SNAPSHOT", "MEMORY SPIKE", "HIGH MEMORY"
+2. **Identify Patterns**: Look at what operations preceded memory increases
+3. **Review Recent Operations**: Spikes log the last 20 operations
+4. **Adjust Settings**: Based on patterns, tune session limits, queue size, etc.
+
+See `MEMORY_MONITORING_GUIDE.md` for complete debugging guide with examples.
+
+#### 💡 Configuration
+
+Default settings optimized for Render 512MB:
+- Memory threshold: 400MB (80% of available)
+- Spike threshold: 50MB sudden increase
+- Monitoring interval: 5 minutes
+- Auto GC trigger: When memory > 400MB
+
+All thresholds configurable in `memory_monitor.py`.
+
+## Recent Changes
+
 ### Enhanced Verification Page & Auto-Verification System (Oct 26, 2025)
 **Major Update**: Completely rebuilt verification page with security, reliability, and user experience improvements, plus one-click automatic verification.
 

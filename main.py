@@ -48,6 +48,7 @@ from database import db
 from phone_auth import PhoneAuthHandler
 from ad_monetization import ad_monetization, PREMIUM_DOWNLOADS
 from access_control import admin_only, paid_or_admin_only, check_download_limit, register_user, check_user_session, get_user_client, force_subscribe
+from memory_monitor import memory_monitor
 from admin_commands import (
     add_admin_command,
     remove_admin_command,
