@@ -48,14 +48,21 @@ class SessionManager:
             if len(self.active_sessions) >= self.max_sessions:
                 oldest_user_id, oldest_client = self.active_sessions.popitem(last=False)
                 try:
+                    from memory_monitor import memory_monitor
+                    memory_monitor.track_session_cleanup(oldest_user_id)
                     await oldest_client.stop()
                     LOGGER(__name__).info(f"Disconnected oldest session: user {oldest_user_id}")
+                    memory_monitor.log_memory_snapshot("Session Disconnected", f"Freed session for user {oldest_user_id}")
                 except Exception as e:
                     LOGGER(__name__).error(f"Error disconnecting session {oldest_user_id}: {e}")
             
             # Create new session
             try:
                 import os
+                from memory_monitor import memory_monitor
+                
+                memory_monitor.track_session_creation(user_id)
+                
                 IS_CONSTRAINED = bool(
                     os.getenv('RENDER') or 
                     os.getenv('RENDER_EXTERNAL_URL') or 
@@ -77,6 +84,9 @@ class SessionManager:
                 await client.start()
                 self.active_sessions[user_id] = client
                 LOGGER(__name__).info(f"Created new session for user {user_id} ({len(self.active_sessions)}/{self.max_sessions})")
+                
+                memory_monitor.log_memory_snapshot("Session Created", f"User {user_id} - Total sessions: {len(self.active_sessions)}")
+                
                 return client
                 
             except Exception as e:
@@ -88,9 +98,12 @@ class SessionManager:
         async with self._lock:
             if user_id in self.active_sessions:
                 try:
+                    from memory_monitor import memory_monitor
+                    memory_monitor.track_session_cleanup(user_id)
                     await self.active_sessions[user_id].stop()
                     del self.active_sessions[user_id]
                     LOGGER(__name__).info(f"Removed session for user {user_id}")
+                    memory_monitor.log_memory_snapshot("Session Removed", f"User {user_id}")
                 except Exception as e:
                     LOGGER(__name__).error(f"Error removing session {user_id}: {e}")
     
